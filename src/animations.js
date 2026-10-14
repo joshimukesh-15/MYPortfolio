@@ -186,18 +186,18 @@ export function initPortfolioAnimations() {
     var italicWords = italicLineEl ? splitIntoWords(italicLineEl) : [];
 
     // Hero Entrance Timeline
-    var heroTL = gsap.timeline({ defaults: { ease: 'power3.out', duration: 1.0 } });
+    var heroTL = gsap.timeline({ defaults: { ease: 'power3.out', duration: isTouch ? 0.65 : 1.0 } });
 
     heroTL
       .from('.nav-inner', {
         y: -20,
         opacity: 0,
-        duration: 0.8
+        duration: isTouch ? 0.55 : 0.8
       })
       .from('#hero-eyebrow', {
         y: 15,
         opacity: 0,
-        duration: 0.7
+        duration: isTouch ? 0.5 : 0.7
       }, '-=0.4')
       .from(nameWords, {
         y: 24,
@@ -239,9 +239,9 @@ export function initPortfolioAnimations() {
             start: 'top 88%',
             once: true
           },
-          y: 35,
+          y: isTouch ? 16 : 35,
           opacity: 0,
-          duration: 0.9,
+          duration: isTouch ? 0.55 : 0.9,
           ease: 'power3.out'
         });
       });
@@ -272,9 +272,9 @@ export function initPortfolioAnimations() {
               }
             }
           },
-          x: -12,
+          x: isTouch ? 0 : -12,
           opacity: 0,
-          duration: 0.7,
+          duration: isTouch ? 0.45 : 0.7,
           ease: 'power2.out'
         });
       });
@@ -289,8 +289,8 @@ export function initPortfolioAnimations() {
             once: true
           },
           opacity: 0,
-          y: 15,
-          duration: 0.8,
+          y: isTouch ? 8 : 15,
+          duration: isTouch ? 0.5 : 0.8,
           ease: 'power2.out'
         });
       });
@@ -307,7 +307,7 @@ export function initPortfolioAnimations() {
             var obj = { val: startVal };
             gsap.to(obj, {
               val: target,
-              duration: 1.6,
+              duration: isTouch ? 0.9 : 1.6,
               ease: 'power2.out',
               onUpdate: function () {
                 el.textContent = Math.round(obj.val);
@@ -326,10 +326,10 @@ export function initPortfolioAnimations() {
             start: 'top 85%',
             once: true
           },
-          x: 16,
+          x: isTouch ? 0 : 16,
           opacity: 0,
-          stagger: 0.06,
-          duration: 0.6,
+          stagger: isTouch ? 0.025 : 0.06,
+          duration: isTouch ? 0.4 : 0.6,
           ease: 'power2.out'
         });
       }
@@ -342,10 +342,10 @@ export function initPortfolioAnimations() {
             start: 'top 85%',
             once: true
           },
-          y: 20,
+          y: isTouch ? 12 : 20,
           opacity: 0,
-          stagger: 0.12,
-          duration: 0.75,
+          stagger: isTouch ? 0.06 : 0.12,
+          duration: isTouch ? 0.5 : 0.75,
           ease: 'power3.out'
         });
       }
@@ -360,10 +360,10 @@ export function initPortfolioAnimations() {
             start: 'top 90%',
             once: true
           },
-          y: 10,
+          y: isTouch ? 5 : 10,
           opacity: 0,
-          duration: 0.4,
-          stagger: 0.03,
+          duration: isTouch ? 0.3 : 0.4,
+          stagger: isTouch ? 0.01 : 0.03,
           ease: 'power2.out'
         });
       });
@@ -377,10 +377,10 @@ export function initPortfolioAnimations() {
             start: 'top 88%',
             once: true
           },
-          y: 25,
+          y: isTouch ? 12 : 25,
           opacity: 0,
-          duration: 0.8,
-          delay: index * 0.1,
+          duration: isTouch ? 0.5 : 0.8,
+          delay: isTouch ? 0 : index * 0.1,
           ease: 'power3.out'
         });
       });
@@ -394,9 +394,9 @@ export function initPortfolioAnimations() {
             start: 'top 85%',
             once: true
           },
-          y: 25,
+          y: isTouch ? 12 : 25,
           opacity: 0,
-          duration: 0.85,
+          duration: isTouch ? 0.55 : 0.85,
           ease: 'power3.out'
         });
       }
@@ -410,9 +410,9 @@ export function initPortfolioAnimations() {
             start: 'top 88%',
             once: true
           },
-          y: 16,
+          y: isTouch ? 8 : 16,
           opacity: 0,
-          duration: 0.7,
+          duration: isTouch ? 0.45 : 0.7,
           ease: 'power2.out'
         });
       });
@@ -426,9 +426,9 @@ export function initPortfolioAnimations() {
             start: 'top 90%',
             once: true
           },
-          y: 20,
+          y: isTouch ? 10 : 20,
           opacity: 0,
-          duration: 0.8,
+          duration: isTouch ? 0.5 : 0.8,
           ease: 'power3.out'
         });
       }
@@ -442,10 +442,10 @@ export function initPortfolioAnimations() {
             start: 'top 92%',
             once: true
           },
-          y: 10,
+          y: isTouch ? 5 : 10,
           opacity: 0,
-          stagger: 0.03,
-          duration: 0.4,
+          stagger: isTouch ? 0.01 : 0.03,
+          duration: isTouch ? 0.3 : 0.4,
           ease: 'power2.out'
         });
       }

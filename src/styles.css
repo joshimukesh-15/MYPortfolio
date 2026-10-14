@@ -1896,6 +1896,19 @@ a:focus-visible, button:focus-visible { outline: 3px solid rgba(224,93,0,.55); o
 /* Final responsive overrides keep small-screen rules ahead of desktop defaults. */
 @media (max-width: 860px) {
   body.menu-open { overflow: hidden; }
+  header.nav.scrolled {
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+  .metrics-strip,
+  .about-facts {
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  section[id] { scroll-margin-top: 84px; }
   .menu-btn {
     display: inline-grid;
     place-items: center;
@@ -1955,4 +1968,21 @@ a:focus-visible, button:focus-visible { outline: 3px solid rgba(224,93,0,.55); o
   .cta-inner { padding-top: 64px; padding-bottom: 44px; }
   .cta-title { font-size: clamp(2.5rem, 12vw, 3.6rem); }
   .footer { padding-top: 32px; padding-bottom: 32px; }
+}
+
+@media (max-width: 900px) {
+  .about-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .about-text,
+  .about-facts {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .about-facts .fact { grid-template-columns: minmax(62px, .34fr) minmax(0, 1fr); gap: 10px; }
+  .fact-k { font-size: 9px; letter-spacing: .1em; }
+  .fact-v { font-size: 14px; }
+  .hero-actions { gap: 8px; }
 }
