@@ -19,6 +19,8 @@
   --sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --maxw: 1280px;
+  --page-gutter: clamp(16px, 3.4vw, 32px);
+  --button-padding-x: 24px;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -1758,6 +1760,73 @@ a:focus-visible, button:focus-visible { outline: 3px solid rgba(224,93,0,.55); o
   white-space: nowrap;
 }
 .project-status .status-dot { width: 6px; height: 6px; }
+
+/* Consistent page edges, button spacing, and readable UI tracking. */
+.nav-inner,
+.hero-inner,
+.section-inner {
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+}
+
+.footer {
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+}
+
+.btn-pill,
+.btn-pill-secondary,
+.btn-pill-light,
+.cta-email-btn {
+  padding-left: var(--button-padding-x);
+  padding-right: var(--button-padding-x);
+  letter-spacing: 0;
+}
+
+.btn-pill-sm,
+.btn-pill-sm-secondary {
+  padding-left: var(--button-padding-x);
+  padding-right: var(--button-padding-x);
+  letter-spacing: 0;
+}
+
+.nav-cta,
+.nav-resume-link {
+  padding-left: 18px;
+  padding-right: 18px;
+  letter-spacing: 0;
+}
+
+.project-tab {
+  letter-spacing: 0;
+}
+
+@media (max-width: 860px) {
+  .nav-inner {
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-inner,
+  .section-inner,
+  .footer {
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
+  }
+
+  .cta-inner {
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
+  }
+
+  .hero-actions .btn-pill,
+  .hero-actions .btn-pill-secondary {
+    padding-left: var(--button-padding-x);
+    padding-right: var(--button-padding-x);
+  }
+}
 .project-name {
   margin-bottom: 14px;
   font-size: clamp(1.65rem, 2.5vw, 2.35rem);
@@ -1822,4 +1891,68 @@ a:focus-visible, button:focus-visible { outline: 3px solid rgba(224,93,0,.55); o
 @media(prefers-reduced-motion:reduce) {
   .project-card-interactive, .project-tab, .feat-item { transition: none; }
   .project-status .status-dot { animation: none; }
+}
+
+/* Final responsive overrides keep small-screen rules ahead of desktop defaults. */
+@media (max-width: 860px) {
+  body.menu-open { overflow: hidden; }
+  .menu-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -8px;
+    border-radius: 10px;
+    touch-action: manipulation;
+  }
+  .nav-links {
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: max(88px, calc(env(safe-area-inset-top) + 72px)) var(--page-gutter) max(24px, env(safe-area-inset-bottom));
+  }
+  .nav-links a { display: flex; min-height: 52px; align-items: center; }
+  .nav-cta-wrap { width: 100%; }
+  .nav-cta, .nav-resume-link { min-height: 48px; }
+  .metrics-inner { padding-left: var(--page-gutter); padding-right: var(--page-gutter); }
+  .hero-eyebrow { align-items: flex-start; line-height: 1.6; }
+  .hero-eyebrow > span:last-child { min-width: 0; }
+  .cta-actions { width: 100%; }
+  .cta-actions > button { min-height: 48px; }
+  .footer-inner, .footer-links { row-gap: 16px; }
+  .footer-links { flex-wrap: wrap; }
+}
+
+@media (max-width: 480px) {
+  .section-pad { padding-top: 64px; padding-bottom: 64px; }
+  .s-head { margin-bottom: 32px; }
+  .s-num, .cta-eyebrow { letter-spacing: .14em; }
+  .s-title { font-size: clamp(2rem, 10vw, 2.7rem); overflow-wrap: anywhere; }
+  .about-text p { font-size: 16px; }
+  .about-facts { padding: 8px 16px; }
+  .about-facts .fact { grid-template-columns: minmax(72px, .38fr) minmax(0, 1fr); gap: 12px; }
+  .fact-v, .edu-deg { overflow-wrap: anywhere; }
+  .metrics-inner { gap: 16px; }
+  .metric-lbl { font-size: 10px; letter-spacing: .08em; }
+  .cert-card { padding-top: 30px; padding-bottom: 30px; }
+  .cert-name { font-size: 22px; overflow-wrap: anywhere; }
+  .cert-footer { align-items: flex-start; }
+  .project-panel .project-top-meta { align-items: flex-start; }
+  .project-status { max-width: 100%; white-space: normal; line-height: 1.5; }
+  .project-actions, .cta-actions { flex-direction: column; align-items: stretch; }
+  .project-actions > a, .cta-actions > button {
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  .cta-inner { padding-top: 64px; padding-bottom: 44px; }
+  .cta-title { font-size: clamp(2.5rem, 12vw, 3.6rem); }
+  .footer { padding-top: 32px; padding-bottom: 32px; }
 }

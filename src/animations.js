@@ -53,9 +53,27 @@ export function initPortfolioAnimations() {
   var menuBtn = document.getElementById('menu-toggle');
   var navLinks = document.getElementById('navlinks');
   if (menuBtn && navLinks) {
+    function setMobileMenuOpen(isOpen) {
+      navLinks.classList.toggle('open', isOpen);
+      menuBtn.setAttribute('aria-expanded', String(isOpen));
+      document.body.classList.toggle('menu-open', isOpen);
+    }
+
     addManagedListener(menuBtn, 'click', function () {
-      navLinks.classList.toggle('open');
+      setMobileMenuOpen(!navLinks.classList.contains('open'));
     });
+
+    addManagedListener(navLinks, 'click', function (event) {
+      if (event.target.closest('a')) setMobileMenuOpen(false);
+    });
+
+    addManagedListener(document, 'keydown', function (event) {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    });
+
+    addManagedListener(window, 'resize', function () {
+      if (window.innerWidth > 860) setMobileMenuOpen(false);
+    }, { passive: true });
   }
 
   // ----------------------------------------------------

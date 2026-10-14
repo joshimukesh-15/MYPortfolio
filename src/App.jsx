@@ -94,7 +94,7 @@ function Navigation() {
 <a href="#top" className="brand">
       Mukesh Joshi <span className="accent">/</span>
 </a>
-<button className="menu-btn" id="menu-toggle" aria-label="Toggle Navigation Menu">
+<button className="menu-btn" id="menu-toggle" aria-label="Toggle Navigation Menu" aria-controls="navlinks" aria-expanded="false">
 <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
 </button>
 <nav className="nav-links" id="navlinks">
