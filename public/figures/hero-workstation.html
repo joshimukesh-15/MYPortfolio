@@ -472,6 +472,7 @@ var HL = (() => {
   }
   var boards = [];
   var byStage = /* @__PURE__ */ new Map();
+  var pendingMoves = /* @__PURE__ */ new Map();
   var raf = 0;
   var last = 0;
   var io = null;
@@ -479,6 +480,16 @@ var HL = (() => {
   function frame(now) {
     const dt = Math.min(0.05, Math.max(0, (now - last) / 1e3));
     last = now;
+    const moves = Array.from(pendingMoves.entries());
+    pendingMoves.clear();
+    for (const [stage, pending] of moves) {
+      if (handlers.get(stage) !== pending.handler) continue;
+      const rect = stage.getBoundingClientRect();
+      pending.handler.move([
+        (pending.event.clientX - rect.left) / rect.width * 400,
+        (pending.event.clientY - rect.top) / rect.height * 320
+      ], pending.event);
+    }
     let any = false;
     for (const b of boards.slice()) if (b.vis && b.awake) {
       try {
@@ -568,31 +579,22 @@ var HL = (() => {
   function pointer(stage, on) {
     handlers.set(stage, on);
     let tm = 0;
-    let moveFrame = 0;
-    let pendingMove = null;
     const pt = (e) => {
       const r = stage.getBoundingClientRect();
       return [(e.clientX - r.left) / r.width * 400, (e.clientY - r.top) / r.height * 320];
     };
-    const cancelPendingMove = () => {
-      if (moveFrame) cancelAnimationFrame(moveFrame);
-      moveFrame = 0;
-      pendingMove = null;
-    };
     const move = (e) => {
       clearTimeout(tm);
       touring.get(stage)?.hold();
-      pendingMove = e;
-      if (!moveFrame) moveFrame = requestAnimationFrame(() => {
-        moveFrame = 0;
-        const next = pendingMove;
-        pendingMove = null;
-        if (next) on.move(pt(next), next);
-      });
+      pendingMoves.set(stage, { handler: on, event: e });
+      if (!raf) {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      }
     };
     const down = (e) => {
       clearTimeout(tm);
-      cancelPendingMove();
+      pendingMoves.delete(stage);
       touring.get(stage)?.hold();
       if (e.pointerType !== "mouse") stage.releasePointerCapture?.(e.pointerId);
       if (on.down) on.down(pt(e), e);
@@ -600,7 +602,7 @@ var HL = (() => {
     };
     const leave = (e) => {
       clearTimeout(tm);
-      cancelPendingMove();
+      pendingMoves.delete(stage);
       tm = window.setTimeout(() => {
         on.leave(e);
         touring.get(stage)?.release();
@@ -611,7 +613,7 @@ var HL = (() => {
     stage.addEventListener("pointerleave", leave);
     return () => {
       clearTimeout(tm);
-      cancelPendingMove();
+      pendingMoves.delete(stage);
       if (handlers.get(stage) === on) handlers.delete(stage);
       stage.removeEventListener("pointermove", move);
       stage.removeEventListener("pointerdown", down);
