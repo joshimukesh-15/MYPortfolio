@@ -1952,7 +1952,19 @@ a:focus-visible, button:focus-visible { outline: 3px solid rgba(224,93,0,.55); o
   .fact-v, .edu-deg { overflow-wrap: anywhere; }
   .metrics-inner { gap: 16px; }
   .metric-lbl { font-size: 10px; letter-spacing: .08em; }
-  .cert-card { padding-top: 30px; padding-bottom: 30px; }
+  .cert-list { grid-template-columns: minmax(0, 1fr); }
+  .cert-card {
+    min-width: 0;
+    padding: 30px 16px;
+  }
+  .cert-card:nth-child(odd),
+  .cert-card:nth-child(even) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .cert-date,
+  .cert-name,
+  .cert-org { min-width: 0; overflow-wrap: anywhere; }
   .cert-name { font-size: 22px; overflow-wrap: anywhere; }
   .cert-footer { align-items: flex-start; }
   .project-panel .project-top-meta { align-items: flex-start; }
