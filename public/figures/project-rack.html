@@ -210,6 +210,7 @@ var HL = (() => {
     rrect: () => rrect,
     run: () => run,
     seg: () => seg,
+    setHostVisible: () => setHostVisible,
     setReducedMotion: () => setReducedMotion,
     solid: () => solid,
     spring: () => spring,
@@ -356,8 +357,16 @@ var HL = (() => {
 
   // packages/hairline/src/core/motion.ts
   var reduced = false;
+  var hostVisible = true;
   var setReducedMotion = (on) => {
     reduced = on;
+  };
+  var setHostVisible = (visible) => {
+    hostVisible = !!visible;
+    boards.forEach((board) => {
+      board.vis = hostVisible;
+      if (board.vis) wake(board);
+    });
   };
   var reducedMotion = () => reduced;
   function spring(x, o = {}) {
@@ -502,7 +511,7 @@ var HL = (() => {
         const set = byStage.get(e.target);
         if (!set) continue;
         for (const b of set) {
-          b.vis = e.isIntersecting;
+          b.vis = e.isIntersecting && hostVisible;
           if (b.vis) wake(b);
         }
       }
@@ -559,17 +568,31 @@ var HL = (() => {
   function pointer(stage, on) {
     handlers.set(stage, on);
     let tm = 0;
+    let moveFrame = 0;
+    let pendingMove = null;
     const pt = (e) => {
       const r = stage.getBoundingClientRect();
       return [(e.clientX - r.left) / r.width * 400, (e.clientY - r.top) / r.height * 320];
     };
+    const cancelPendingMove = () => {
+      if (moveFrame) cancelAnimationFrame(moveFrame);
+      moveFrame = 0;
+      pendingMove = null;
+    };
     const move = (e) => {
       clearTimeout(tm);
       touring.get(stage)?.hold();
-      on.move(pt(e), e);
+      pendingMove = e;
+      if (!moveFrame) moveFrame = requestAnimationFrame(() => {
+        moveFrame = 0;
+        const next = pendingMove;
+        pendingMove = null;
+        if (next) on.move(pt(next), next);
+      });
     };
     const down = (e) => {
       clearTimeout(tm);
+      cancelPendingMove();
       touring.get(stage)?.hold();
       if (e.pointerType !== "mouse") stage.releasePointerCapture?.(e.pointerId);
       if (on.down) on.down(pt(e), e);
@@ -577,6 +600,7 @@ var HL = (() => {
     };
     const leave = (e) => {
       clearTimeout(tm);
+      cancelPendingMove();
       tm = window.setTimeout(() => {
         on.leave(e);
         touring.get(stage)?.release();
@@ -587,6 +611,7 @@ var HL = (() => {
     stage.addEventListener("pointerleave", leave);
     return () => {
       clearTimeout(tm);
+      cancelPendingMove();
       if (handlers.get(stage) === on) handlers.delete(stage);
       stage.removeEventListener("pointermove", move);
       stage.removeEventListener("pointerdown", down);
@@ -810,6 +835,11 @@ var HL = (() => {
   /* ?w=240 narrows the page, for a look at the size of a thumbnail */
   const w = Number(params.get("w"));
   if (w > 0) document.querySelector("main").style.maxWidth = w + "px";
+
+  addEventListener("message", (event) => {
+    if (event.source !== parent || event.origin !== location.origin || event.data?.type !== "hairline-host-visibility") return;
+    HL.setHostVisible(event.data.visible);
+  });
 
   /* a figure that fails says so under the stage, instead of leaving an empty plate */
   addEventListener("error", (e) => {

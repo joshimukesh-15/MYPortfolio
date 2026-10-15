@@ -10,9 +10,32 @@ const ctaBridge = `${import.meta.env.BASE_URL}figures/cta-bridge.html`;
 function HairlineFigure({ source, title, className = '', initialReadout, formatReadout, onProjectOpen, showCaption = true, caption }) {
   const frameRef = useRef(null);
   const observerRef = useRef(null);
+  const visibilityObserverRef = useRef(null);
+  const isFrameVisibleRef = useRef(false);
   const [readout, setReadout] = useState(initialReadout);
 
-  useEffect(() => () => observerRef.current?.disconnect(), []);
+  useEffect(() => () => {
+    observerRef.current?.disconnect();
+    visibilityObserverRef.current?.disconnect();
+    frameRef.current?.contentWindow?.postMessage({ type: 'hairline-host-visibility', visible: false }, window.location.origin);
+  }, []);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || !('IntersectionObserver' in window)) return undefined;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isFrameVisibleRef.current = entry.isIntersecting;
+      frame.contentWindow?.postMessage({ type: 'hairline-host-visibility', visible: entry.isIntersecting }, window.location.origin);
+    }, { rootMargin: '120px 0px', threshold: 0 });
+
+    visibilityObserverRef.current = observer;
+    observer.observe(frame);
+    return () => {
+      observer.disconnect();
+      if (visibilityObserverRef.current === observer) visibilityObserverRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!onProjectOpen) return undefined;
@@ -27,6 +50,8 @@ function HairlineFigure({ source, title, className = '', initialReadout, formatR
   function prepareFigure() {
     const doc = frameRef.current?.contentDocument;
     if (!doc) return;
+
+    frameRef.current?.contentWindow?.postMessage({ type: 'hairline-host-visibility', visible: isFrameVisibleRef.current }, window.location.origin);
 
     doc.documentElement.dataset.theme = 'light';
     const palette = { plate: '#ece9e2', hi: '#e05d00', edge: '#57565f', mid: '#a9a69e', lo: '#d3cfc5' };
