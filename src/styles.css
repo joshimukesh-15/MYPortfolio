@@ -885,18 +885,20 @@ section {
 ---------------------------------------------------- */
 .cert-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
   border-top: 1px solid var(--line);
 }
 
 @media(max-width: 760px) {
   .cert-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 .cert-card {
-  padding: 44px 32px 44px 0;
+  min-width: 0;
+  padding: 44px 24px;
   border-bottom: 1px solid var(--line);
   position: relative;
   transition: background-color 0.3s ease;
@@ -918,10 +920,10 @@ section {
 @media(max-width: 760px) {
   .cert-card:nth-child(odd) {
     border-right: none;
-    padding-right: 0;
+    padding-right: 24px;
   }
   .cert-card:nth-child(even) {
-    padding-left: 0;
+    padding-left: 24px;
   }
 }
 
@@ -936,6 +938,8 @@ section {
 }
 
 .cert-name {
+  max-width: 100%;
+  overflow-wrap: break-word;
   font-family: var(--serif);
   font-weight: 400;
   font-size: 25px;
@@ -1137,8 +1141,8 @@ section {
 }
 
 .btn-pill-sm:hover {
-  background-color: #22c55e;
-  border-color: #22c55e;
+  background-color: var(--signal-dim);
+  border-color: var(--signal-dim);
   box-shadow: 0 6px 22px var(--signal-glow);
 }
 
@@ -1390,8 +1394,8 @@ section {
 }
 
 .btn-pill-light:hover {
-  background-color: #22c55e;
-  border-color: #22c55e;
+  background-color: var(--signal-dim);
+  border-color: var(--signal-dim);
   box-shadow: 0 8px 26px var(--signal-glow);
 }
 

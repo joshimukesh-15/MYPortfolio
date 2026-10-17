@@ -64,7 +64,7 @@ export function initPortfolioAnimations() {
     });
 
     addManagedListener(navLinks, 'click', function (event) {
-      if (event.target.closest('a')) setMobileMenuOpen(false);
+      if (event.target.closest('a, button')) setMobileMenuOpen(false);
     });
 
     addManagedListener(document, 'keydown', function (event) {
@@ -167,8 +167,10 @@ export function initPortfolioAnimations() {
 
     // Word-split utility for hero heading stagger
     function splitIntoWords(el) {
+      if (!el) return [];
+      if (el.dataset.splitDone === 'true') return el.querySelectorAll('span');
       var text = el.textContent;
-      var words = text.split(/\s+/);
+      var words = text.split(/\s+/).filter(Boolean);
       el.textContent = '';
       words.forEach(function(word, i) {
         var s = document.createElement('span');
@@ -177,6 +179,7 @@ export function initPortfolioAnimations() {
         el.appendChild(s);
         if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
       });
+      el.dataset.splitDone = 'true';
       return el.querySelectorAll('span');
     }
 
