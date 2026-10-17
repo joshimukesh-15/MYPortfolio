@@ -227,7 +227,8 @@ var HL = (() => {
   var clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   var lerp = (a, b, t) => a + (b - a) * t;
   var rad = (d) => d * Math.PI / 180;
-  var r2 = (n) => Math.round(n * 100) / 100;
+  // Keep sub-pixel path precision so SVG motion stays smooth on high-refresh displays.
+  var r2 = (n) => Math.round(n * 1000) / 1000;
   var poly = (pts) => "M" + pts.map((p) => r2(p[0]) + " " + r2(p[1])).join("L") + "Z";
   var seg = (a, b) => `M${r2(a[0])} ${r2(a[1])}L${r2(b[0])} ${r2(b[1])}`;
   var open = (pts) => pts.length < 2 ? "" : "M" + pts.map((p) => r2(p[0]) + " " + r2(p[1])).join("L");

@@ -495,7 +495,7 @@ function Footer() {
     <footer className="footer">
 <div className="footer-inner">
 <a href="#top" className="footer-brand">
-      Mukesh Joshi <span className="sub">Full-Stack Developer</span>
+      Mukesh Joshi <span className="sub">Software Engineer</span>
 </a>
 <nav className="footer-links">
 <a href="https://www.linkedin.com/in/mukesh-joshi-433290379/" target="_blank" rel="noopener">LinkedIn</a>
