@@ -10,10 +10,11 @@ const ctaBridge = `${import.meta.env.BASE_URL}figures/cta-bridge.html`;
 
 function HairlineFigure({ source, title, className = '', initialReadout, formatReadout, onProjectOpen, showCaption = true, caption }) {
   const frameRef = useRef(null);
+  const readoutRef = useRef(null);
   const observerRef = useRef(null);
   const visibilityObserverRef = useRef(null);
-  const isFrameVisibleRef = useRef(false);
-  const [readout, setReadout] = useState(initialReadout);
+  const isFrameVisibleRef = useRef(true);
+  const lastReadoutValRef = useRef(initialReadout);
 
   useEffect(() => () => {
     observerRef.current?.disconnect();
@@ -32,7 +33,7 @@ function HairlineFigure({ source, title, className = '', initialReadout, formatR
       try {
         frame.contentWindow?.postMessage({ type: 'hairline-host-visibility', visible: entry.isIntersecting }, '*');
       } catch (_) {}
-    }, { rootMargin: '120px 0px', threshold: 0 });
+    }, { rootMargin: '240px 0px', threshold: 0 });
 
     visibilityObserverRef.current = observer;
     observer.observe(frame);
@@ -57,7 +58,7 @@ function HairlineFigure({ source, title, className = '', initialReadout, formatR
     if (!doc) return;
 
     try {
-      frameRef.current?.contentWindow?.postMessage({ type: 'hairline-host-visibility', visible: isFrameVisibleRef.current }, '*');
+      frameRef.current?.contentWindow?.postMessage({ type: 'hairline-host-visibility', visible: true }, '*');
     } catch (_) {}
 
     doc.documentElement.dataset.theme = 'light';
@@ -70,8 +71,14 @@ function HairlineFigure({ source, title, className = '', initialReadout, formatR
     const sourceReadout = doc.getElementById('read');
     if (!sourceReadout) return;
     const updateReadout = () => {
-      const value = sourceReadout.textContent.trim();
-      setReadout(formatReadout ? formatReadout(value) : value);
+      const raw = sourceReadout.textContent.trim();
+      const value = formatReadout ? formatReadout(raw) : raw;
+      if (value !== lastReadoutValRef.current) {
+        lastReadoutValRef.current = value;
+        if (readoutRef.current) {
+          readoutRef.current.textContent = value;
+        }
+      }
     };
     observerRef.current?.disconnect();
     observerRef.current = new doc.defaultView.MutationObserver(updateReadout);
@@ -81,12 +88,10 @@ function HairlineFigure({ source, title, className = '', initialReadout, formatR
 
   return (
     <>
-      <iframe ref={frameRef} className={`hairline-frame ${className}`} title={title} src={source} onLoad={prepareFigure} loading="lazy" />
+      <iframe ref={frameRef} className={`hairline-frame ${className}`} title={title} src={source} onLoad={prepareFigure} />
       {showCaption ? (
-        <p className="hairline-caption"><span className="hairline-readout">{readout}</span><span>{caption}</span></p>
-      ) : (
-        <span className="hairline-sr" aria-live="polite">{readout}</span>
-      )}
+        <p className="hairline-caption"><span ref={readoutRef} className="hairline-readout">{initialReadout}</span><span>{caption}</span></p>
+      ) : null}
     </>
   );
 }

@@ -1651,7 +1651,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid rgba(224,93,0,.55); o
 .hero-actions-row { display:flex; justify-content:flex-end; margin-top:22px; }
 .hero-actions-row .hero-actions { justify-content:flex-end; }
 .hairline-card { overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--paper-2); }
-.hairline-frame { display:block; width:100%; aspect-ratio:5/4; border:0; background:transparent; }
+.hairline-frame { display:block; width:100%; aspect-ratio:5/4; border:0; background:transparent; transform:translateZ(0); backface-visibility:hidden; will-change:transform; }
 .hairline-caption { display:flex; flex-direction:column; gap:8px; margin:0; padding:18px 20px 20px; border-top:1px solid var(--line); font-family:var(--mono); font-size:12px; line-height:1.65; color:var(--ink-muted); }
 .hairline-readout { color:var(--signal); font-weight:600; }
 .project-card-interactive { padding:32px; }

@@ -474,6 +474,16 @@ var HL = (() => {
   var boards = [];
   var byStage = /* @__PURE__ */ new Map();
   var pendingMoves = /* @__PURE__ */ new Map();
+  var stageRects = /* @__PURE__ */ new WeakMap();
+  function getStageRect(stage) {
+    let r = stageRects.get(stage);
+    if (!r) {
+      r = stage.getBoundingClientRect();
+      stageRects.set(stage, r);
+    }
+    return r;
+  }
+  window.addEventListener("resize", () => { stageRects = new WeakMap(); }, { passive: true });
   var raf = 0;
   var last = 0;
   var io = null;
@@ -485,7 +495,7 @@ var HL = (() => {
     pendingMoves.clear();
     for (const [stage, pending] of moves) {
       if (handlers.get(stage) !== pending.handler) continue;
-      const rect = stage.getBoundingClientRect();
+      const rect = getStageRect(stage);
       pending.handler.move([
         (pending.event.clientX - rect.left) / rect.width * 400,
         (pending.event.clientY - rect.top) / rect.height * 320
@@ -581,7 +591,7 @@ var HL = (() => {
     handlers.set(stage, on);
     let tm = 0;
     const pt = (e) => {
-      const r = stage.getBoundingClientRect();
+      const r = getStageRect(stage);
       return [(e.clientX - r.left) / r.width * 400, (e.clientY - r.top) / r.height * 320];
     };
     const move = (e) => {

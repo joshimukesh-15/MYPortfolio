@@ -474,6 +474,16 @@ var HL = (() => {
   var boards = [];
   var byStage = /* @__PURE__ */ new Map();
   var pendingMoves = /* @__PURE__ */ new Map();
+  var stageRects = /* @__PURE__ */ new WeakMap();
+  function getStageRect(stage) {
+    let r = stageRects.get(stage);
+    if (!r) {
+      r = stage.getBoundingClientRect();
+      stageRects.set(stage, r);
+    }
+    return r;
+  }
+  window.addEventListener("resize", () => { stageRects = new WeakMap(); }, { passive: true });
   var raf = 0;
   var last = 0;
   var io = null;
@@ -485,7 +495,7 @@ var HL = (() => {
     pendingMoves.clear();
     for (const [stage, pending] of moves) {
       if (handlers.get(stage) !== pending.handler) continue;
-      const rect = stage.getBoundingClientRect();
+      const rect = getStageRect(stage);
       pending.handler.move([
         (pending.event.clientX - rect.left) / rect.width * 400,
         (pending.event.clientY - rect.top) / rect.height * 320
@@ -581,7 +591,7 @@ var HL = (() => {
     handlers.set(stage, on);
     let tm = 0;
     const pt = (e) => {
-      const r = stage.getBoundingClientRect();
+      const r = getStageRect(stage);
       return [(e.clientX - r.left) / r.width * 400, (e.clientY - r.top) / r.height * 320];
     };
     const move = (e) => {
@@ -943,7 +953,10 @@ function mount({ stage, svg, read }, value) {
     blades.push({ i, z, r, inner, g, body, vents, groove, bays, led, pull: tween(base), base });
   }
   function draw(b, now) {
-    const xo = tval(b.pull, now), r = b.r.map(p => ({ ...p, u: p.u + xo })), inn = b.inner.map(p => ({ ...p, u: p.u + xo }));
+    const xo = tval(b.pull, now);
+    if (b.drawnXo !== undefined && Math.abs(xo - b.drawnXo) < 0.0005) return;
+    b.drawnXo = xo;
+    const r = b.r.map(p => ({ ...p, u: p.u + xo })), inn = b.inner.map(p => ({ ...p, u: p.u + xo }));
     put(b.body, prism(P, front, r, inn, b.z, b.z + T));
     const zt = b.z + T + .08, zm = b.z + T / 2, xf = X0 + W + xo + .08, yf = Y0 + D + .08;
     b.vents.forEach((el, k) => { const y = Y0 + 7 + k * 5.4; el.setAttribute('d', seg(P(X0 + 10 + xo, y, zt), P(X0 + 34 + xo, y, zt))); });
