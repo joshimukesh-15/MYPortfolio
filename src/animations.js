@@ -10,186 +10,168 @@ export function initPortfolioAnimations() {
     cleanups.push(() => target.removeEventListener(type, handler, options));
   }
 
-  'use strict';
+  const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 860;
 
-  // Dynamic Year
-  var yearEl = document.getElementById('year');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+  // Mobile Menu Toggle & State Helper
+  const menuBtn = document.getElementById('menu-toggle');
+  const navLinks = document.getElementById('navlinks');
 
-  var isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var isTouch = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 820;
-
-  // ----------------------------------------------------
-  // TOP UI SLIDER PROGRESS LINE
-  // ----------------------------------------------------
-  var topSliderBar = document.getElementById('top-slider-bar');
-  function updateTopSlider() {
-    var winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-    var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    if (height > 0 && topSliderBar) {
-      var progress = Math.min(100, Math.max(0, (winScroll / height) * 100));
-      topSliderBar.style.width = progress + '%';
-    }
+  function setMobileMenuOpen(isOpen) {
+    if (!menuBtn || !navLinks) return;
+    navLinks.classList.toggle('open', isOpen);
+    menuBtn.setAttribute('aria-expanded', String(isOpen));
+    document.body.classList.toggle('menu-open', isOpen);
   }
-  addManagedListener(window, 'scroll', updateTopSlider, { passive: true });
+
+  if (menuBtn && navLinks) {
+    addManagedListener(menuBtn, 'click', () => {
+      setMobileMenuOpen(!navLinks.classList.contains('open'));
+    });
+
+    addManagedListener(navLinks, 'click', (event) => {
+      if (event.target.closest('a, button')) setMobileMenuOpen(false);
+    });
+
+    addManagedListener(document, 'keydown', (event) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    });
+
+    addManagedListener(window, 'resize', () => {
+      if (window.innerWidth > 860) setMobileMenuOpen(false);
+    }, { passive: true });
+  }
 
   // Smooth Anchor Navigation
-  document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     addManagedListener(anchor, 'click', function (e) {
-      var targetId = this.getAttribute('href');
+      const targetId = this.getAttribute('href');
       if (targetId === '#' || !targetId) return;
-      var target = document.querySelector(targetId);
+      const target = document.querySelector(targetId);
       if (target) {
         e.preventDefault();
-        var navLinks = document.getElementById('navlinks');
-        if (navLinks) navLinks.classList.remove('open');
-        
+        setMobileMenuOpen(false);
         target.scrollIntoView({ behavior: isReducedMotion ? 'auto' : 'smooth' });
       }
     });
   });
 
-  // Mobile Menu Toggle
-  var menuBtn = document.getElementById('menu-toggle');
-  var navLinks = document.getElementById('navlinks');
-  if (menuBtn && navLinks) {
-    function setMobileMenuOpen(isOpen) {
-      navLinks.classList.toggle('open', isOpen);
-      menuBtn.setAttribute('aria-expanded', String(isOpen));
-      document.body.classList.toggle('menu-open', isOpen);
-    }
-
-    addManagedListener(menuBtn, 'click', function () {
-      setMobileMenuOpen(!navLinks.classList.contains('open'));
+  // Safe word-split utility with automatic text restoration on cleanup
+  function splitIntoWords(el) {
+    if (!el) return [];
+    const originalText = el.textContent;
+    const words = originalText.split(/\s+/).filter(Boolean);
+    el.textContent = '';
+    words.forEach((word, i) => {
+      const s = document.createElement('span');
+      s.textContent = word;
+      s.style.display = 'inline-block';
+      el.appendChild(s);
+      if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
     });
-
-    addManagedListener(navLinks, 'click', function (event) {
-      if (event.target.closest('a, button')) setMobileMenuOpen(false);
+    cleanups.push(() => {
+      el.textContent = originalText;
     });
-
-    addManagedListener(document, 'keydown', function (event) {
-      if (event.key === 'Escape') setMobileMenuOpen(false);
-    });
-
-    addManagedListener(window, 'resize', function () {
-      if (window.innerWidth > 860) setMobileMenuOpen(false);
-    }, { passive: true });
+    return el.querySelectorAll('span');
   }
 
-  // ----------------------------------------------------
-  // 4. GSAP TIMELINES, SCROLL REVEALS & METRICS ROLLUP
-  // ----------------------------------------------------
-  if (typeof gsap !== 'undefined' && !isReducedMotion) {
+  // Wrap all GSAP animations & ScrollTriggers inside gsap.context()
+  const ctx = gsap.context(() => {
+    // Top Progress Bar via ScrollTrigger
+    const topSliderBar = document.getElementById('top-slider-bar');
+    if (topSliderBar) {
+      ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => {
+          topSliderBar.style.width = `${self.progress * 100}%`;
+        }
+      });
+    }
+
+    if (isReducedMotion) return;
 
     // Navbar Scroll Transition
-    var navEl = document.getElementById('nav');
-    if (navEl && typeof ScrollTrigger !== 'undefined') {
+    const navEl = document.getElementById('nav');
+    if (navEl) {
       ScrollTrigger.create({
         start: 'top -30',
-        end: 99999,
-        onUpdate: function (self) {
-          if (self.progress > 0) {
-            navEl.classList.add('scrolled');
-          } else {
-            navEl.classList.remove('scrolled');
-          }
-        }
+        end: 'max',
+        onToggle: (self) => navEl.classList.toggle('scrolled', self.isActive)
       });
     }
 
     // Active Section Tracking + Sliding Nav Indicator
-    if (typeof ScrollTrigger !== 'undefined') {
-      var sections = document.querySelectorAll('section[id]');
-      var navItems = document.querySelectorAll('.nav-links a.nav-item');
-      var navLinksContainer = document.getElementById('navlinks');
-      var navIndicator = null;
-      var lastActiveLink = null;
+    const sections = document.querySelectorAll('section[id]');
+    const navItems = document.querySelectorAll('.nav-links a.nav-item');
+    const navLinksContainer = document.getElementById('navlinks');
+    let navIndicator = null;
+    let lastActiveLink = null;
 
-      if (navLinksContainer && !isTouch) {
-        navIndicator = document.createElement('div');
-        navIndicator.className = 'nav-slide-indicator';
-        navLinksContainer.appendChild(navIndicator);
-        cleanups.push(function () { navIndicator.remove(); });
-        gsap.set(navIndicator, { opacity: 0, width: 0, left: 0, top: 0 });
-      }
+    if (navLinksContainer && !isTouch) {
+      navIndicator = document.createElement('div');
+      navIndicator.className = 'nav-slide-indicator';
+      navLinksContainer.appendChild(navIndicator);
+      cleanups.push(() => navIndicator.remove());
+      gsap.set(navIndicator, { opacity: 0, width: 0, left: 0, top: 0 });
+    }
 
-      sections.forEach(function (section) {
-        ScrollTrigger.create({
-          trigger: section,
-          start: 'top 45%',
-          end: 'bottom 45%',
-          onEnter: function () { updateActiveNav(section.id); },
-          onEnterBack: function () { updateActiveNav(section.id); }
+    function moveNavIndicator(link, shouldAnimate) {
+      if (!navIndicator || !navLinksContainer) return;
+      const lr = link.getBoundingClientRect();
+      const cr = navLinksContainer.getBoundingClientRect();
+      const props = {
+        left: lr.left - cr.left,
+        width: lr.width,
+        top: lr.bottom - cr.top,
+        opacity: 1
+      };
+
+      if (shouldAnimate) {
+        gsap.to(navIndicator, {
+          ...props,
+          duration: 0.35,
+          ease: 'power3.out',
+          overwrite: true
         });
-      });
+      } else {
+        gsap.set(navIndicator, props);
+      }
+    }
 
-      function moveNavIndicator(link, shouldAnimate) {
-        if (!navIndicator || !navLinksContainer) return;
-        var lr = link.getBoundingClientRect();
-        var cr = navLinksContainer.getBoundingClientRect();
-        var toLeft = lr.left - cr.left;
-        var toWidth = lr.width;
-        var toTop = lr.bottom - cr.top;
-
-        if (shouldAnimate) {
-          gsap.to(navIndicator, {
-            left: toLeft,
-            width: toWidth,
-            top: toTop,
-            opacity: 1,
-            duration: 0.35,
-            ease: 'power3.out',
-            overwrite: true
-          });
+    function updateActiveNav(id) {
+      navItems.forEach((link) => {
+        if (link.getAttribute('href') === `#${id}`) {
+          link.classList.add('active');
+          moveNavIndicator(link, Boolean(lastActiveLink));
+          lastActiveLink = link;
         } else {
-          gsap.set(navIndicator, { left: toLeft, width: toWidth, top: toTop, opacity: 1 });
+          link.classList.remove('active');
         }
-      }
-
-      function updateActiveNav(id) {
-        navItems.forEach(function (link) {
-          if (link.getAttribute('href') === '#' + id) {
-            link.classList.add('active');
-            moveNavIndicator(link, !!lastActiveLink);
-            lastActiveLink = link;
-          } else {
-            link.classList.remove('active');
-          }
-        });
-      }
-
-      addManagedListener(window, 'resize', function() {
-        if (lastActiveLink && navIndicator) {
-          moveNavIndicator(lastActiveLink, false);
-        }
-      }, { passive: true });
-    }
-
-    // Word-split utility for hero heading stagger
-    function splitIntoWords(el) {
-      if (!el) return [];
-      if (el.dataset.splitDone === 'true') return el.querySelectorAll('span');
-      var text = el.textContent;
-      var words = text.split(/\s+/).filter(Boolean);
-      el.textContent = '';
-      words.forEach(function(word, i) {
-        var s = document.createElement('span');
-        s.textContent = word;
-        s.style.display = 'inline-block';
-        el.appendChild(s);
-        if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
       });
-      el.dataset.splitDone = 'true';
-      return el.querySelectorAll('span');
     }
 
-    var nameLineEl = document.querySelector('#hero-title .name-line');
-    var italicLineEl = document.querySelector('#hero-title .italic-line');
-    var nameWords = nameLineEl ? splitIntoWords(nameLineEl) : [];
-    var italicWords = italicLineEl ? splitIntoWords(italicLineEl) : [];
+    sections.forEach((section) => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 45%',
+        end: 'bottom 45%',
+        onEnter: () => updateActiveNav(section.id),
+        onEnterBack: () => updateActiveNav(section.id)
+      });
+    });
+
+    addManagedListener(window, 'resize', () => {
+      if (lastActiveLink && navIndicator) {
+        moveNavIndicator(lastActiveLink, false);
+      }
+    }, { passive: true });
 
     // Hero Entrance Timeline
-    var heroTL = gsap.timeline({ defaults: { ease: 'power3.out', duration: isTouch ? 0.65 : 1.0 } });
+    const nameWords = splitIntoWords(document.querySelector('#hero-title .name-line'));
+    const italicWords = splitIntoWords(document.querySelector('#hero-title .italic-line'));
+
+    const heroTL = gsap.timeline({ defaults: { ease: 'power3.out', duration: isTouch ? 0.65 : 1.0 } });
 
     heroTL
       .from('.nav-inner', {
@@ -206,15 +188,13 @@ export function initPortfolioAnimations() {
         y: 24,
         opacity: 0,
         duration: 0.5,
-        stagger: 0.05,
-        ease: 'power3.out'
+        stagger: 0.05
       }, '-=0.5')
       .from(italicWords, {
         y: 24,
         opacity: 0,
         duration: 0.5,
-        stagger: 0.05,
-        ease: 'power3.out'
+        stagger: 0.05
       }, '-=0.4')
       .from('#hero-lead', {
         y: 20,
@@ -233,232 +213,222 @@ export function initPortfolioAnimations() {
       }, '-=0.4');
 
     // Section Titles Reveal
-    if (typeof ScrollTrigger !== 'undefined') {
-      var sectionTitles = document.querySelectorAll('.s-title, .cta-title');
-      sectionTitles.forEach(function (title) {
-        gsap.from(title, {
-          scrollTrigger: {
-            trigger: title,
-            start: 'top 88%',
-            once: true
-          },
-          y: isTouch ? 16 : 35,
-          opacity: 0,
-          duration: isTouch ? 0.55 : 0.9,
-          ease: 'power3.out'
-        });
+    document.querySelectorAll('.s-title, .cta-title').forEach((title) => {
+      gsap.from(title, {
+        scrollTrigger: {
+          trigger: title,
+          start: 'top 88%',
+          once: true
+        },
+        y: isTouch ? 16 : 35,
+        opacity: 0,
+        duration: isTouch ? 0.55 : 0.9,
+        ease: 'power3.out'
       });
+    });
 
-      // Section Head Numbers
-      var sectionNums = document.querySelectorAll('.s-num, .cta-eyebrow');
-      sectionNums.forEach(function (num) {
-        var numSignal = num.querySelector('.signal');
-        var targetNum = numSignal ? parseInt(numSignal.textContent, 10) : NaN;
+    // Section Head Numbers
+    document.querySelectorAll('.s-num, .cta-eyebrow').forEach((num) => {
+      const numSignal = num.querySelector('.signal');
+      const targetNum = numSignal ? parseInt(numSignal.textContent, 10) : NaN;
 
-        gsap.from(num, {
-          scrollTrigger: {
-            trigger: num,
-            start: 'top 90%',
-            once: true,
-            onEnter: function() {
-              if (numSignal && !isNaN(targetNum)) {
-                var counter = { val: 0 };
-                gsap.to(counter, {
-                  val: targetNum,
-                  duration: 0.4,
-                  ease: 'power2.out',
-                  onUpdate: function() {
-                    var rounded = Math.round(counter.val);
-                    numSignal.textContent = (rounded < 10 ? '0' : '') + rounded;
-                  }
-                });
-              }
+      gsap.from(num, {
+        scrollTrigger: {
+          trigger: num,
+          start: 'top 90%',
+          once: true,
+          onEnter: () => {
+            if (numSignal && !isNaN(targetNum)) {
+              const counter = { val: 0 };
+              gsap.to(counter, {
+                val: targetNum,
+                duration: 0.4,
+                ease: 'power2.out',
+                onUpdate: () => {
+                  const rounded = Math.round(counter.val);
+                  numSignal.textContent = (rounded < 10 ? '0' : '') + rounded;
+                }
+              });
             }
-          },
-          x: isTouch ? 0 : -12,
-          opacity: 0,
-          duration: isTouch ? 0.45 : 0.7,
-          ease: 'power2.out'
-        });
+          }
+        },
+        x: isTouch ? 0 : -12,
+        opacity: 0,
+        duration: isTouch ? 0.45 : 0.7,
+        ease: 'power2.out'
       });
+    });
 
-      // Section Dividers Entrance
-      var sectionDividers = document.querySelectorAll('.skills-wrap, .cert-list, .edu-list');
-      sectionDividers.forEach(function (div) {
-        gsap.from(div, {
-          scrollTrigger: {
-            trigger: div,
-            start: 'top 92%',
-            once: true
-          },
-          opacity: 0,
-          y: isTouch ? 8 : 15,
-          duration: isTouch ? 0.5 : 0.8,
-          ease: 'power2.out'
-        });
+    // Section Dividers Entrance
+    document.querySelectorAll('.skills-wrap, .cert-list, .edu-list').forEach((div) => {
+      gsap.from(div, {
+        scrollTrigger: {
+          trigger: div,
+          start: 'top 92%',
+          once: true
+        },
+        opacity: 0,
+        y: isTouch ? 8 : 15,
+        duration: isTouch ? 0.5 : 0.8,
+        ease: 'power2.out'
       });
+    });
 
-      // Metrics Rollup Counter Animation
-      ScrollTrigger.create({
-        trigger: '.metrics-strip',
-        start: 'top 88%',
-        once: true,
-        onEnter: function () {
-          document.querySelectorAll('.metric-num').forEach(function (el) {
-            var target = parseInt(el.getAttribute('data-target'), 10);
-            var startVal = target > 100 ? target - 26 : 0;
-            var obj = { val: startVal };
-            gsap.to(obj, {
-              val: target,
-              duration: isTouch ? 0.9 : 1.6,
-              ease: 'power2.out',
-              onUpdate: function () {
-                el.textContent = Math.round(obj.val);
-              }
-            });
+    // Metrics Rollup Counter Animation
+    ScrollTrigger.create({
+      trigger: '.metrics-strip',
+      start: 'top 88%',
+      once: true,
+      onEnter: () => {
+        document.querySelectorAll('.metric-num').forEach((el) => {
+          const target = parseInt(el.getAttribute('data-target'), 10);
+          const startVal = target > 100 ? target - 26 : 0;
+          const obj = { val: startVal };
+          gsap.to(obj, {
+            val: target,
+            duration: isTouch ? 0.9 : 1.6,
+            ease: 'power2.out',
+            onUpdate: () => {
+              el.textContent = Math.round(obj.val);
+            }
           });
-        }
+        });
+      }
+    });
+
+    // About Section
+    const aboutFacts = document.querySelectorAll('.about-facts .fact');
+    if (aboutFacts.length > 0) {
+      gsap.from(aboutFacts, {
+        scrollTrigger: {
+          trigger: '.about-facts',
+          start: 'top 85%',
+          once: true
+        },
+        x: isTouch ? 0 : 16,
+        opacity: 0,
+        stagger: isTouch ? 0.025 : 0.06,
+        duration: isTouch ? 0.4 : 0.6,
+        ease: 'power2.out'
       });
-
-      // About Section
-      var aboutFacts = document.querySelectorAll('.about-facts .fact');
-      if (aboutFacts.length > 0) {
-        gsap.from(aboutFacts, {
-          scrollTrigger: {
-            trigger: '.about-facts',
-            start: 'top 85%',
-            once: true
-          },
-          x: isTouch ? 0 : 16,
-          opacity: 0,
-          stagger: isTouch ? 0.025 : 0.06,
-          duration: isTouch ? 0.4 : 0.6,
-          ease: 'power2.out'
-        });
-      }
-
-      var aboutText = document.querySelectorAll('.about-text p');
-      if (aboutText.length > 0) {
-        gsap.from(aboutText, {
-          scrollTrigger: {
-            trigger: '.about-text',
-            start: 'top 85%',
-            once: true
-          },
-          y: isTouch ? 12 : 20,
-          opacity: 0,
-          stagger: isTouch ? 0.06 : 0.12,
-          duration: isTouch ? 0.5 : 0.75,
-          ease: 'power3.out'
-        });
-      }
-
-      // Skills Rows — tag stagger
-      var skillRows = document.querySelectorAll('.skill-row');
-      skillRows.forEach(function (row) {
-        var tags = row.querySelectorAll('.skill-tag');
-        gsap.from(tags, {
-          scrollTrigger: {
-            trigger: row,
-            start: 'top 90%',
-            once: true
-          },
-          y: isTouch ? 5 : 10,
-          opacity: 0,
-          duration: isTouch ? 0.3 : 0.4,
-          stagger: isTouch ? 0.01 : 0.03,
-          ease: 'power2.out'
-        });
-      });
-
-      // Certification Cards
-      var certCards = document.querySelectorAll('.cert-card');
-      certCards.forEach(function (card, index) {
-        gsap.from(card, {
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 88%',
-            once: true
-          },
-          y: isTouch ? 12 : 25,
-          opacity: 0,
-          duration: isTouch ? 0.5 : 0.8,
-          delay: isTouch ? 0 : index * 0.1,
-          ease: 'power3.out'
-        });
-      });
-
-      // Project Showcase Card
-      var projectCardEl = document.getElementById('project-showcase');
-      if (projectCardEl) {
-        gsap.from(projectCardEl, {
-          scrollTrigger: {
-            trigger: projectCardEl,
-            start: 'top 85%',
-            once: true
-          },
-          y: isTouch ? 12 : 25,
-          opacity: 0,
-          duration: isTouch ? 0.55 : 0.85,
-          ease: 'power3.out'
-        });
-      }
-
-      // Education Row
-      var eduRows = document.querySelectorAll('.edu-row');
-      eduRows.forEach(function (row) {
-        gsap.from(row, {
-          scrollTrigger: {
-            trigger: row,
-            start: 'top 88%',
-            once: true
-          },
-          y: isTouch ? 8 : 16,
-          opacity: 0,
-          duration: isTouch ? 0.45 : 0.7,
-          ease: 'power2.out'
-        });
-      });
-
-      // CTA Actions
-      var ctaActions = document.querySelector('.cta-actions');
-      if (ctaActions) {
-        gsap.from(ctaActions, {
-          scrollTrigger: {
-            trigger: '.cta-actions',
-            start: 'top 90%',
-            once: true
-          },
-          y: isTouch ? 10 : 20,
-          opacity: 0,
-          duration: isTouch ? 0.5 : 0.8,
-          ease: 'power3.out'
-        });
-      }
-
-      // Footer Links Stagger
-      var footerAnchors = document.querySelectorAll('.footer-links a');
-      if (footerAnchors.length > 0) {
-        gsap.from(footerAnchors, {
-          scrollTrigger: {
-            trigger: '.footer-links',
-            start: 'top 92%',
-            once: true
-          },
-          y: isTouch ? 5 : 10,
-          opacity: 0,
-          stagger: isTouch ? 0.01 : 0.03,
-          duration: isTouch ? 0.3 : 0.4,
-          ease: 'power2.out'
-        });
-      }
     }
-  }
 
+    const aboutText = document.querySelectorAll('.about-text p');
+    if (aboutText.length > 0) {
+      gsap.from(aboutText, {
+        scrollTrigger: {
+          trigger: '.about-text',
+          start: 'top 85%',
+          once: true
+        },
+        y: isTouch ? 12 : 20,
+        opacity: 0,
+        stagger: isTouch ? 0.06 : 0.12,
+        duration: isTouch ? 0.5 : 0.75,
+        ease: 'power3.out'
+      });
+    }
+
+    // Skills Rows — tag stagger
+    document.querySelectorAll('.skill-row').forEach((row) => {
+      const tags = row.querySelectorAll('.skill-tag');
+      gsap.from(tags, {
+        scrollTrigger: {
+          trigger: row,
+          start: 'top 90%',
+          once: true
+        },
+        y: isTouch ? 5 : 10,
+        opacity: 0,
+        duration: isTouch ? 0.3 : 0.4,
+        stagger: isTouch ? 0.01 : 0.03,
+        ease: 'power2.out'
+      });
+    });
+
+    // Certification Cards
+    document.querySelectorAll('.cert-card').forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 88%',
+          once: true
+        },
+        y: isTouch ? 12 : 25,
+        opacity: 0,
+        duration: isTouch ? 0.5 : 0.8,
+        delay: isTouch ? 0 : index * 0.1,
+        ease: 'power3.out'
+      });
+    });
+
+    // Project Showcase Card
+    const projectCardEl = document.getElementById('project-showcase');
+    if (projectCardEl) {
+      gsap.from(projectCardEl, {
+        scrollTrigger: {
+          trigger: projectCardEl,
+          start: 'top 85%',
+          once: true
+        },
+        y: isTouch ? 12 : 25,
+        opacity: 0,
+        duration: isTouch ? 0.55 : 0.85,
+        ease: 'power3.out'
+      });
+    }
+
+    // Education Row
+    document.querySelectorAll('.edu-row').forEach((row) => {
+      gsap.from(row, {
+        scrollTrigger: {
+          trigger: row,
+          start: 'top 88%',
+          once: true
+        },
+        y: isTouch ? 8 : 16,
+        opacity: 0,
+        duration: isTouch ? 0.45 : 0.7,
+        ease: 'power2.out'
+      });
+    });
+
+    // CTA Actions
+    const ctaActions = document.querySelector('.cta-actions');
+    if (ctaActions) {
+      gsap.from(ctaActions, {
+        scrollTrigger: {
+          trigger: '.cta-actions',
+          start: 'top 90%',
+          once: true
+        },
+        y: isTouch ? 10 : 20,
+        opacity: 0,
+        duration: isTouch ? 0.5 : 0.8,
+        ease: 'power3.out'
+      });
+    }
+
+    // Footer Links Stagger
+    const footerAnchors = document.querySelectorAll('.footer-links a');
+    if (footerAnchors.length > 0) {
+      gsap.from(footerAnchors, {
+        scrollTrigger: {
+          trigger: '.footer-links',
+          start: 'top 92%',
+          once: true
+        },
+        y: isTouch ? 5 : 10,
+        opacity: 0,
+        stagger: isTouch ? 0.01 : 0.03,
+        duration: isTouch ? 0.3 : 0.4,
+        ease: 'power2.out'
+      });
+    }
+  });
 
   return () => {
+    ctx.revert();
     cleanups.splice(0).forEach((cleanup) => cleanup());
-    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    gsap.killTweensOf('*');
   };
 }
