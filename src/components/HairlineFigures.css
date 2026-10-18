@@ -1,0 +1,72 @@
+.hairline-figure {
+  --figure-ink: var(--ink, #17161b);
+  --figure-paper: var(--paper-2, #ece9e2);
+  --figure-orange: var(--signal, #e05d00);
+  --figure-orange-text: var(--signal-text, #b34700);
+  color: var(--figure-ink);
+  font-family: var(--mono, ui-monospace, monospace);
+  width: 100%;
+}
+
+.bookshelf-figure { max-width: 480px; margin: 0 auto; }
+.bookshelf-scene { position: relative; height: 300px; padding: 21px 24px 18px; perspective: 900px; }
+.bookshelf-back { position: absolute; inset: 14px 27px 22px; background: linear-gradient(145deg, #f7f5f1, #ece9e2); border: 1px solid #77747a; border-radius: 5px; box-shadow: inset 0 0 0 8px rgba(255,255,255,.16); }
+.bookshelf-top { position: absolute; z-index: 3; left: 18px; right: 18px; top: 9px; height: 13px; background: #ece9e2; border: 1px solid #57565f; transform: skewX(-28deg); border-radius: 3px; box-shadow: 0 2px 0 rgba(23,22,27,.12); }
+.bookshelf-side { position: absolute; z-index: 2; top: 19px; bottom: 16px; width: 13px; background: linear-gradient(90deg, #d9d5cc, #f1eee8); border-inline: 1px solid #57565f; }
+.bookshelf-side-left { left: 18px; transform: skewY(-10deg); }
+.bookshelf-side-right { right: 18px; transform: skewY(10deg); }
+.bookshelf-interior { position: relative; z-index: 4; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 3px 8px 0; }
+.bookshelf-bay { min-height: 47px; display: flex; flex-direction: column; justify-content: flex-end; }
+.bookshelf-books { height: 37px; display: flex; align-items: flex-end; gap: 3px; padding-inline: 11px; }
+.shelf-book { position: relative; display: block; flex: 1 1 0; min-width: 8px; max-width: 40px; height: var(--book-height, 32px); padding: 0; border: 1px solid #57565f; border-radius: 3px 3px 1px 1px; cursor: pointer; transform: translateY(0) rotate(0); transform-origin: bottom center; box-shadow: inset 3px 0 rgba(255,255,255,.23), inset -3px 0 rgba(0,0,0,.05), 1px 2px 2px rgba(40,35,26,.08); transition: transform 220ms ease, filter 220ms ease, box-shadow 220ms ease; }
+.shelf-book:nth-child(3n) { --book-height: 28px; }
+.shelf-book:nth-child(4n) { --book-height: 35px; }
+.shelf-book:nth-child(5n) { --book-height: 25px; }
+.book-0 { background: linear-gradient(90deg,#e4e0d7,#f7f5f1); }
+.book-1 { background: linear-gradient(90deg,#ddd8cf,#f2efe8); }
+.book-2 { background: linear-gradient(90deg,#d3d1cc,#eeece7); }
+.book-3 { background: linear-gradient(90deg,#e6dfd3,#f4efe7); }
+.book-4 { background: linear-gradient(90deg,#d9dee0,#f1f3f2); }
+.book-band { position: absolute; left: 15%; right: 15%; bottom: 6px; height: 3px; border-block: 1px solid rgba(255,255,255,.42); opacity: .75; }
+.book-mark { position: absolute; left: 50%; top: 6px; width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,.65); transform: translateX(-50%); }
+.shelf-book:hover, .shelf-book:focus-visible, .shelf-book.is-active { z-index: 5; outline: 2px solid var(--figure-orange); outline-offset: 2px; transform: translateY(-9px) rotate(-3deg) scale(1.08); filter: saturate(1.14); box-shadow: 0 8px 12px rgba(39,41,35,.2); }
+.shelf-book:focus-visible { outline-width: 3px; }
+.bookshelf-shelf { position: relative; z-index: 2; height: 9px; margin-inline: -1px; background: linear-gradient(180deg,#f2efe8,#d9d5cc); border: 1px solid #57565f; box-shadow: 0 3px 0 rgba(23,22,27,.12); transform: skewX(-3deg); display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+.bookshelf-shelf span { position: absolute; right: 6px; top: 10px; color: #514d43; font: 600 8px/1.2 var(--mono, ui-monospace, monospace); letter-spacing: .035em; }
+.bookshelf-shelf.shelf-active { background: linear-gradient(180deg,#f4e1d2,#efc8aa); border-color: var(--figure-orange); }
+.bookshelf-plinth { position: absolute; z-index: 5; bottom: 8px; left: 10px; right: 10px; height: 13px; border: 1px solid #57565f; border-radius: 2px; background: linear-gradient(180deg,#ece9e2,#d9d5cc); transform: skewX(-12deg); box-shadow: 0 3px 0 rgba(39,41,35,.12); }
+.bookshelf-caption { display: flex; justify-content: space-between; gap: 10px; padding: 11px 4px 0; border-top: 1px solid var(--line, rgba(23,22,27,.12)); font: 600 10px/1.45 var(--mono, ui-monospace, monospace); }
+.bookshelf-caption span:first-child { color: var(--figure-orange-text); }
+.bookshelf-caption span:last-child { color: var(--ink-faint, #66646e); text-align: right; }
+
+.mailbox-figure { max-width: 240px; margin: 0; padding: 12px 14px 14px; border: 1px solid var(--line, rgba(23,22,27,.12)); border-radius: 16px; background: linear-gradient(160deg, #f7f5f1, #eeece7); box-shadow: 0 8px 24px rgba(23,22,27,.05); overflow: hidden; }
+.mailbox-button { position: relative; display: block; width: 100%; height: 150px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.mailbox-button:focus-visible { outline: 2px solid var(--figure-orange); outline-offset: 5px; border-radius: 8px; }
+.mailbox-ground { position: absolute; left: 6%; right: 5%; bottom: 14px; height: 18px; border: 1px solid #77747a; border-radius: 50%; background: #ece9e2; transform: skewX(-25deg); }
+.mailbox-post { position: absolute; left: 47%; bottom: 18px; width: 16px; height: 95px; border-inline: 1px solid #57565f; background: linear-gradient(90deg,#d9d5cc,#f1eee8); transform: skewY(-3deg); }
+.mailbox-body { position: absolute; left: 18%; top: 34px; width: 66%; height: 78px; border: 2px solid #57565f; border-radius: 29px 29px 9px 9px; background: linear-gradient(145deg,#f7f5f1,#ddd9d0); box-shadow: inset -8px -6px rgba(92,79,62,.06), 2px 3px 0 rgba(40,35,26,.1); }
+.mailbox-door { position: absolute; inset: 10px 11px 8px; border: 1px solid rgba(74,66,54,.48); border-radius: 23px 23px 5px 5px; background: linear-gradient(145deg,#f7f5f1,#ece9e2); transform-origin: top center; transition: transform 320ms cubic-bezier(.2,.8,.2,1); }
+.mailbox-slot { position: absolute; left: 27%; right: 27%; top: 43px; height: 5px; border-radius: 5px; background: #57565f; z-index: 2; }
+.mailbox-letter { position: absolute; z-index: 1; left: 35%; top: 42px; width: 30%; height: 37px; border: 1px solid #8d8b93; background: #f7f5f1; transform: translateY(0) scaleY(.25); opacity: .35; transition: transform 360ms ease, opacity 240ms ease; }
+.mailbox-knob { position: absolute; z-index: 3; left: 48%; bottom: 10px; width: 7px; height: 7px; border-radius: 50%; background: var(--figure-orange); }
+.mailbox-flag-stem { position: absolute; z-index: 4; left: 80%; top: 22px; width: 4px; height: 37px; background: #57565f; transform: rotate(-5deg); transform-origin: bottom center; transition: transform 280ms ease; }
+.mailbox-flag { position: absolute; z-index: 5; left: 77%; top: 25px; width: 33px; height: 18px; border-radius: 2px 7px 2px 2px; background: var(--figure-orange); clip-path: polygon(0 0,100% 0,82% 100%,0 100%); transform-origin: left bottom; transition: transform 280ms ease; }
+.mailbox-card-caption { display: flex; flex-direction: column; gap: 5px; padding-top: 9px; border-top: 1px solid var(--line, rgba(23,22,27,.12)); font: 600 10px/1.45 var(--mono, ui-monospace, monospace); }
+.mailbox-card-caption span:first-child { color: var(--figure-orange-text); }
+.mailbox-card-caption span:last-child { color: var(--ink-muted, #57565f); }
+.mailbox-figure:hover .mailbox-door, .mailbox-figure:focus-within .mailbox-door, .mailbox-figure.is-open .mailbox-door { transform: rotateX(42deg); }
+.mailbox-figure:hover .mailbox-letter, .mailbox-figure:focus-within .mailbox-letter, .mailbox-figure.is-open .mailbox-letter { transform: translateY(-31px) scaleY(1); opacity: 1; }
+.mailbox-figure:hover .mailbox-flag-stem, .mailbox-figure:focus-within .mailbox-flag-stem, .mailbox-figure.is-open .mailbox-flag-stem { transform: rotate(50deg); }
+.mailbox-figure:hover .mailbox-flag, .mailbox-figure:focus-within .mailbox-flag, .mailbox-figure.is-open .mailbox-flag { transform: rotate(5deg) translateY(-4px); }
+.mailbox-figure:hover .mailbox-card-caption span:last-child, .mailbox-figure:focus-within .mailbox-card-caption span:last-child, .mailbox-figure.is-open .mailbox-card-caption span:last-child { color: var(--figure-orange-text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hairline-figure *, .hairline-figure *::before, .hairline-figure *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+@media (max-width: 520px) {
+  .bookshelf-scene { height: 270px; padding-inline: 18px; }
+  .bookshelf-shelf span { font-size: 7px; }
+  .bookshelf-caption { font-size: 9px; }
+}
+

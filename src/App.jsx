@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initPortfolioAnimations } from './animations.js';
+import { BookshelfFigure, MailboxFigure } from './components/HairlineFigures.jsx';
 import './styles.css';
 
 const EMAIL = 'joshimukesh2005@gmail.com';
@@ -9,7 +10,6 @@ const LINKEDIN_URL = 'https://www.linkedin.com/in/mukesh-joshi-433290379/';
 
 const heroWorkstation = `${import.meta.env.BASE_URL}figures/hero-workstation.html`;
 const projectRack = `${import.meta.env.BASE_URL}figures/project-rack.html`;
-const ctaBridge = `${import.meta.env.BASE_URL}figures/cta-bridge.html`;
 
 function HairlineFigure({ source, title, className = '', initialReadout, formatReadout, onProjectOpen, showCaption = true, caption, loading = 'lazy' }) {
   const frameRef = useRef(null);
@@ -127,7 +127,7 @@ function Navigation() {
           Mukesh Joshi <span className="accent">/</span>
         </a>
         <button className="menu-btn" id="menu-toggle" aria-label="Toggle Navigation Menu" aria-controls="navlinks" aria-expanded="false">
-          <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
         </button>
         <nav className="nav-links" id="navlinks">
           <a href="#about" className="nav-item">About</a>
@@ -137,7 +137,7 @@ function Navigation() {
           <a href="#education" className="nav-item">Education</a>
           <div className="nav-cta-wrap">
             <a href="/Mukesh_Joshi_Resume_1.pdf" target="_blank" rel="noopener noreferrer" className="nav-cta">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
               &nbsp;Resume
             </a>
           </div>
@@ -159,8 +159,8 @@ function Hero({ onCopyEmail }) {
           <div className="hero-copy">
             <div className="hero-title-wrap">
               <h1 id="hero-title">
-                <span className="name-line">Mukesh Joshi</span>
-                <span className="italic-line">Software Engineer.</span>
+                <span className="name-line"><span>Mukesh</span> <span>Joshi</span></span>
+                <span className="italic-line"><span>Software</span> <span>Engineer.</span></span>
               </h1>
             </div>
             <p className="hero-lead" id="hero-lead">
@@ -168,7 +168,7 @@ function Hero({ onCopyEmail }) {
             </p>
           </div>
           <figure className="hero-peg-visual" aria-label="Interactive laptop with a tilting screen and pressable keys">
-            <HairlineFigure source={heroWorkstation} className="hero-peg-frame" title="Interactive laptop figure. Move over the screen to tilt it, click the screen to open or close it, and hover keys to press them." initialReadout="Move over the laptop to tilt its screen and press its keys." showCaption={false} loading="eager" />
+            <HairlineFigure source={heroWorkstation} className="hero-peg-frame" title="Interactive laptop figure. Move over the screen to tilt it, click the screen to open or close it, and hover keys to press them." initialReadout="Move over the laptop to tilt its screen and press its keys." showCaption={false} loading="lazy" />
           </figure>
         </div>
         <div className="hero-actions-row">
@@ -177,11 +177,11 @@ function Hero({ onCopyEmail }) {
               Explore projects <span className="arrow">&nbsp;→</span>
             </a>
             <button type="button" className="btn-pill-secondary" onClick={() => onCopyEmail(EMAIL)}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
               Get in touch
             </button>
             <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="btn-pill-secondary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
               GitHub
             </a>
           </div>
@@ -311,11 +311,11 @@ function ProjectsSection() {
                 </p>
                 <div className="project-actions">
                   <a href="https://github.com/joshimukesh-15/mobius-ai" target="_blank" rel="noopener noreferrer" className="btn-pill-sm">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
                     View Code <span className="arrow">→</span>
                   </a>
                   <a href={`${GITHUB_URL}?tab=repositories`} target="_blank" rel="noopener noreferrer" className="btn-pill-sm-secondary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
                     All Repositories
                   </a>
                 </div>
@@ -352,7 +352,7 @@ function ProjectsSection() {
                 </p>
                 <div className="project-actions">
                   <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="btn-pill-sm-secondary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
                     GitHub Profile <span className="arrow">→</span>
                   </a>
                 </div>
@@ -373,7 +373,18 @@ function ProjectsSection() {
   );
 }
 
+
+const skillGroups = [
+  { name: 'Languages', skills: ['Python', 'JavaScript (ES6+)', 'SQL', 'HTML5 & CSS3'] },
+  { name: 'Backend & Data', skills: ['FastAPI', 'PostgreSQL', 'RESTful APIs', 'WebSockets', 'JWT & RBAC'] },
+  { name: 'AI & Retrieval', skills: ['LangChain', 'ChromaDB', 'Corrective RAG', 'Hybrid Search (BM25 + Vector)'] },
+  { name: 'Frontend', skills: ['React.js', 'Tailwind CSS', 'Bootstrap', 'GSAP Animations', 'Responsive UI'] },
+  { name: 'Architecture & Tools', skills: ['Git & GitHub', 'Multi-Tenant Design', 'OOP', 'VS Code'] },
+];
+
 function SkillsSection() {
+  const [activeSkill, setActiveSkill] = useState(null);
+
   return (
     <section id="skills">
       <div className="section-inner section-pad">
@@ -385,54 +396,29 @@ function SkillsSection() {
             </div>
           </div>
         </div>
-        <div className="skills-wrap">
-          <div className="skill-row">
-            <div className="skill-cat">Languages</div>
-            <div className="skill-items">
-              <span className="skill-tag">Python</span><span className="skill-sep">·</span>
-              <span className="skill-tag">JavaScript (ES6+)</span><span className="skill-sep">·</span>
-              <span className="skill-tag">SQL</span><span className="skill-sep">·</span>
-              <span className="skill-tag">HTML5 &amp; CSS3</span>
-            </div>
+        <div className="skills-layout">
+          <div className="skills-wrap">
+            {skillGroups.map((group, groupIndex) => (
+              <div className={`skill-row${activeSkill?.group === groupIndex ? ' is-selected' : ''}`} key={group.name}>
+                <div className="skill-cat">{group.name}</div>
+                <div className="skill-items">
+                  {group.skills.map((skill, skillIndex) => (
+                    <span
+                      className={`skill-tag${activeSkill?.group === groupIndex && activeSkill?.skillIndex === skillIndex ? ' is-selected' : ''}`}
+                      key={skill}
+                      onPointerEnter={() => setActiveSkill({ group: groupIndex, skillIndex })}
+                      onPointerLeave={() => setActiveSkill(null)}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="skill-row">
-            <div className="skill-cat">Backend &amp; Data</div>
-            <div className="skill-items">
-              <span className="skill-tag">FastAPI</span><span className="skill-sep">·</span>
-              <span className="skill-tag">PostgreSQL</span><span className="skill-sep">·</span>
-              <span className="skill-tag">RESTful APIs</span><span className="skill-sep">·</span>
-              <span className="skill-tag">WebSockets</span><span className="skill-sep">·</span>
-              <span className="skill-tag">JWT &amp; RBAC</span>
-            </div>
-          </div>
-          <div className="skill-row">
-            <div className="skill-cat">AI &amp; Retrieval</div>
-            <div className="skill-items">
-              <span className="skill-tag">LangChain</span><span className="skill-sep">·</span>
-              <span className="skill-tag">ChromaDB</span><span className="skill-sep">·</span>
-              <span className="skill-tag">Corrective RAG</span><span className="skill-sep">·</span>
-              <span className="skill-tag">Hybrid Search (BM25 + Vector)</span>
-            </div>
-          </div>
-          <div className="skill-row">
-            <div className="skill-cat">Frontend</div>
-            <div className="skill-items">
-              <span className="skill-tag">React.js</span><span className="skill-sep">·</span>
-              <span className="skill-tag">Tailwind CSS</span><span className="skill-sep">·</span>
-              <span className="skill-tag">Bootstrap</span><span className="skill-sep">·</span>
-              <span className="skill-tag">GSAP Animations</span><span className="skill-sep">·</span>
-              <span className="skill-tag">Responsive UI</span>
-            </div>
-          </div>
-          <div className="skill-row">
-            <div className="skill-cat">Architecture &amp; Tools</div>
-            <div className="skill-items">
-              <span className="skill-tag">Git &amp; GitHub</span><span className="skill-sep">·</span>
-              <span className="skill-tag">Multi-Tenant Design</span><span className="skill-sep">·</span>
-              <span className="skill-tag">OOP</span><span className="skill-sep">·</span>
-              <span className="skill-tag">VS Code</span>
-            </div>
-          </div>
+          <aside className="hairline-card skills-figure-card" aria-label="Interactive skills bookshelf">
+            <BookshelfFigure groups={skillGroups} activeSkill={activeSkill} onSelect={setActiveSkill} />
+          </aside>
         </div>
       </div>
     </section>
@@ -519,13 +505,13 @@ function ContactSection({ onCopyEmail }) {
               Email me <span className="arrow">&nbsp;→</span>
             </a>
             <button type="button" className="cta-email-btn" onClick={() => onCopyEmail(EMAIL)}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
               {EMAIL}
             </button>
           </div>
         </div>
-        <aside className="hairline-card cta-bridge-card" aria-label="Interactive bridge call to action">
-          <HairlineFigure source={ctaBridge} title="Interactive footbridge. Hover a deck section to lift it and its neighbors." initialReadout="REST" caption="A small bridge from your next idea to what we can build together." />
+        <aside className="cta-mailbox-wrap" aria-label="Interactive mailbox">
+          <MailboxFigure className="contact-mailbox" />
         </aside>
       </div>
     </section>
@@ -554,7 +540,16 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const toastTimerRef = useRef(null);
 
-  useEffect(() => initPortfolioAnimations(), []);
+  useEffect(() => {
+    let cleanup;
+    const rafId = requestAnimationFrame(() => {
+      cleanup = initPortfolioAnimations();
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (cleanup) cleanup();
+    };
+  }, []);
 
   useEffect(() => () => {
     if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
@@ -582,14 +577,16 @@ export default function App() {
       <TopProgress />
       <CopyToast toastMessage={toastMessage} />
       <Navigation />
-      <Hero onCopyEmail={handleCopyEmail} />
-      <MetricsStrip />
-      <AboutSection />
-      <ProjectsSection />
-      <SkillsSection />
-      <CertificationsSection />
-      <EducationSection />
-      <ContactSection onCopyEmail={handleCopyEmail} />
+      <main id="main">
+        <Hero onCopyEmail={handleCopyEmail} />
+        <MetricsStrip />
+        <AboutSection />
+        <ProjectsSection />
+        <SkillsSection />
+        <CertificationsSection />
+        <EducationSection />
+        <ContactSection onCopyEmail={handleCopyEmail} />
+      </main>
       <Footer />
     </>
   );

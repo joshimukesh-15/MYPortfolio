@@ -56,19 +56,23 @@ export function initPortfolioAnimations() {
     });
   });
 
-  // Safe word-split utility with automatic text restoration on cleanup
+  // Safe word-split utility with DocumentFragment to prevent layout thrashing
   function splitIntoWords(el) {
     if (!el) return [];
+    const existing = el.querySelectorAll('span');
+    if (existing.length > 0) return existing;
     const originalText = el.textContent;
     const words = originalText.split(/\s+/).filter(Boolean);
-    el.textContent = '';
+    const frag = document.createDocumentFragment();
     words.forEach((word, i) => {
       const s = document.createElement('span');
       s.textContent = word;
       s.style.display = 'inline-block';
-      el.appendChild(s);
-      if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+      frag.appendChild(s);
+      if (i < words.length - 1) frag.appendChild(document.createTextNode(' '));
     });
+    el.textContent = '';
+    el.appendChild(frag);
     cleanups.push(() => {
       el.textContent = originalText;
     });
@@ -77,6 +81,11 @@ export function initPortfolioAnimations() {
 
   // Wrap all GSAP animations & ScrollTriggers inside gsap.context()
   const ctx = gsap.context(() => {
+    ScrollTrigger.config({
+      limitCallbacks: true,
+      ignoreMobileResize: true
+    });
+
     // Top Progress Bar via ScrollTrigger
     const topSliderBar = document.getElementById('top-slider-bar');
     if (topSliderBar) {
@@ -118,25 +127,28 @@ export function initPortfolioAnimations() {
 
     function moveNavIndicator(link, shouldAnimate) {
       if (!navIndicator || !navLinksContainer) return;
-      const lr = link.getBoundingClientRect();
-      const cr = navLinksContainer.getBoundingClientRect();
-      const props = {
-        left: lr.left - cr.left,
-        width: lr.width,
-        top: lr.bottom - cr.top,
-        opacity: 1
-      };
+      requestAnimationFrame(() => {
+        if (!link || !navLinksContainer || !navIndicator) return;
+        const lr = link.getBoundingClientRect();
+        const cr = navLinksContainer.getBoundingClientRect();
+        const props = {
+          left: lr.left - cr.left,
+          width: lr.width,
+          top: lr.bottom - cr.top,
+          opacity: 1
+        };
 
-      if (shouldAnimate) {
-        gsap.to(navIndicator, {
-          ...props,
-          duration: 0.35,
-          ease: 'power3.out',
-          overwrite: true
-        });
-      } else {
-        gsap.set(navIndicator, props);
-      }
+        if (shouldAnimate) {
+          gsap.to(navIndicator, {
+            ...props,
+            duration: 0.35,
+            ease: 'power3.out',
+            overwrite: true
+          });
+        } else {
+          gsap.set(navIndicator, props);
+        }
+      });
     }
 
     function updateActiveNav(id) {
@@ -174,43 +186,31 @@ export function initPortfolioAnimations() {
     const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
     heroTL
-      .from(nameWords, {
-        y: isTouch ? 12 : 20,
-        opacity: 0,
-        duration: isTouch ? 0.35 : 0.55,
-        stagger: isTouch ? 0.02 : 0.04
-      }, 0)
-      .from(italicWords, {
-        y: isTouch ? 12 : 20,
-        opacity: 0,
-        duration: isTouch ? 0.35 : 0.55,
-        stagger: isTouch ? 0.02 : 0.04
-      }, isTouch ? 0.08 : 0.12)
       .from('.nav-inner', {
-        y: -16,
-        opacity: 0,
-        duration: isTouch ? 0.4 : 0.6
+        y: -10,
+        opacity: isTouch ? 0.85 : 0,
+        duration: isTouch ? 0.3 : 0.5
       }, 0)
       .from('#hero-eyebrow', {
-        y: 12,
-        opacity: 0,
-        duration: isTouch ? 0.35 : 0.5
-      }, 0.04)
+        y: 8,
+        opacity: isTouch ? 0.85 : 0,
+        duration: isTouch ? 0.25 : 0.45
+      }, 0.02)
       .from('#hero-lead', {
-        y: 14,
-        opacity: 0,
-        duration: isTouch ? 0.4 : 0.6
-      }, isTouch ? 0.12 : 0.2)
+        y: 8,
+        opacity: isTouch ? 0.85 : 0,
+        duration: isTouch ? 0.3 : 0.5
+      }, isTouch ? 0.06 : 0.15)
       .from('#hero-actions', {
-        y: 12,
-        opacity: 0,
-        duration: isTouch ? 0.35 : 0.5
-      }, isTouch ? 0.18 : 0.28)
+        y: 8,
+        opacity: isTouch ? 0.85 : 0,
+        duration: isTouch ? 0.25 : 0.45
+      }, isTouch ? 0.08 : 0.2)
       .from('.metrics-strip', {
-        opacity: 0,
-        y: 14,
-        duration: isTouch ? 0.4 : 0.6
-      }, isTouch ? 0.22 : 0.36);
+        opacity: isTouch ? 0.85 : 0,
+        y: 8,
+        duration: isTouch ? 0.3 : 0.5
+      }, isTouch ? 0.1 : 0.25);
 
     // Section Titles Reveal
     document.querySelectorAll('.s-title, .cta-title').forEach((title) => {
@@ -425,6 +425,8 @@ export function initPortfolioAnimations() {
         ease: 'power2.out'
       });
     }
+
+    ScrollTrigger.refresh();
   });
 
   return () => {

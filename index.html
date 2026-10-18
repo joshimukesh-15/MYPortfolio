@@ -53,6 +53,9 @@
       />
     </noscript>
 
+    <!-- Main Stylesheet Preload & Link -->
+    <link rel="stylesheet" href="/src/styles.css" />
+
     <!-- Open Graph — LinkedIn / WhatsApp / Discord / Slack -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mukeshjoshi.vercel.app/" />
@@ -143,7 +146,73 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="top-slider-track" aria-hidden="true">
+        <div class="top-slider-bar" id="top-slider-bar"></div>
+      </div>
+      <header class="nav" id="nav">
+        <div class="nav-inner">
+          <a href="#top" class="brand">
+            Mukesh Joshi <span class="accent">/</span>
+          </a>
+          <button class="menu-btn" id="menu-toggle" aria-label="Toggle Navigation Menu" aria-controls="navlinks" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+          </button>
+          <nav class="nav-links" id="navlinks">
+            <a href="#about" class="nav-item">About</a>
+            <a href="#projects" class="nav-item">Projects</a>
+            <a href="#skills" class="nav-item">Skills</a>
+            <a href="#certifications" class="nav-item">Certifications</a>
+            <a href="#education" class="nav-item">Education</a>
+            <div class="nav-cta-wrap">
+              <a href="/Mukesh_Joshi_Resume_1.pdf" target="_blank" rel="noopener noreferrer" class="nav-cta">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                &nbsp;Resume
+              </a>
+            </div>
+          </nav>
+        </div>
+      </header>
+      <main id="main">
+        <section class="hero" id="top">
+          <div class="hero-inner">
+            <p class="hero-eyebrow" id="hero-eyebrow">
+              <span class="signal-pulse"></span>
+              <span>Full-Stack &amp; AI Engineer · Open to Internships</span>
+            </p>
+            <div class="hero-feature-grid">
+              <div class="hero-copy">
+                <div class="hero-title-wrap">
+                  <h1 id="hero-title">
+                    <span class="name-line"><span>Mukesh</span> <span>Joshi</span></span>
+                    <span class="italic-line"><span>Software</span> <span>Engineer.</span></span>
+                  </h1>
+                </div>
+                <p class="hero-lead" id="hero-lead">
+                  Architecting backend systems, multi-tenant web applications, and self-correcting RAG pipelines with <b>Python, FastAPI, PostgreSQL, and React</b>.
+                </p>
+              </div>
+            </div>
+            <div class="hero-actions-row">
+              <div class="hero-actions" id="hero-actions">
+                <a href="#projects" class="btn-pill">
+                  Explore projects <span class="arrow">&nbsp;→</span>
+                </a>
+                <a href="mailto:joshimukesh2005@gmail.com" class="btn-pill-secondary">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                  Get in touch
+                </a>
+                <a href="https://github.com/joshimukesh-15" target="_blank" rel="noopener noreferrer" class="btn-pill-secondary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
+                  GitHub
+                </a>
+              </div>
+            </div>
+            <a class="hero-scroll-cue" href="#about" aria-label="Scroll to about section"><span></span> Scroll to explore</a>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <!-- Static fallback for JS-disabled crawlers -->
     <noscript>
