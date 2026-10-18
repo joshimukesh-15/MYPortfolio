@@ -2083,50 +2083,5 @@ section {
   will-change: transform;
 }
 
-/* ----------------------------------------------------
-   PERFORMANCE: LAYOUT CONTAINMENT
-   Sections below the fold skip rendering until they
-   approach the viewport (cuts initial paint cost).
-   Hero and About are excluded — they're above the fold.
----------------------------------------------------- */
-#skills,
-#certifications,
-#education,
-.cta,
-.footer {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 600px;
-}
-
-/* Limit reflow scope to within each section */
-section {
-  contain: layout style;
-}
-
-/*
-  Cards: contain layout + style only.
-  Do NOT use contain:paint — it clips overflow and
-  creates an implicit scrollable container that traps
-  hairline iframes and buttons inside them.
-*/
-.cert-card,
-.project-card-interactive,
-.project-panel,
-.about-text,
-.about-facts {
-  contain: layout style;
-}
-
-/* ----------------------------------------------------
-   PERFORMANCE: STABLE IFRAME DIMENSIONS (prevents CLS)
-   aspect-ratio is already set on .hairline-frame at
-   line 542 with the GPU transform hack intact.
-   Extra per-figure overrides only:
----------------------------------------------------- */
-.project-rack-frame {
-  aspect-ratio: 4 / 5;
-}
-
-.cta-bridge-card .hairline-frame {
-  aspect-ratio: 7 / 4;
-}
+/* NOTE: content-visibility and section contain rules are intentionally
+   omitted — they break hairline iframe rendering (blank + scroll). */
