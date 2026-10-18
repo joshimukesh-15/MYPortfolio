@@ -11,7 +11,7 @@ const heroWorkstation = `${import.meta.env.BASE_URL}figures/hero-workstation.htm
 const projectRack = `${import.meta.env.BASE_URL}figures/project-rack.html`;
 const ctaBridge = `${import.meta.env.BASE_URL}figures/cta-bridge.html`;
 
-function HairlineFigure({ source, title, className = '', initialReadout, formatReadout, onProjectOpen, showCaption = true, caption }) {
+function HairlineFigure({ source, title, className = '', initialReadout, formatReadout, onProjectOpen, showCaption = true, caption, loading = 'lazy' }) {
   const frameRef = useRef(null);
   const readoutRef = useRef(null);
   const observerRef = useRef(null);
@@ -95,7 +95,7 @@ function HairlineFigure({ source, title, className = '', initialReadout, formatR
 
   return (
     <>
-      <iframe ref={frameRef} className={`hairline-frame ${className}`} title={title} src={source} onLoad={prepareFigure} />
+      <iframe ref={frameRef} className={`hairline-frame ${className}`} title={title} src={source} onLoad={prepareFigure} loading={loading} />
       {showCaption ? (
         <p className="hairline-caption"><span ref={readoutRef} className="hairline-readout">{initialReadout}</span><span>{caption}</span></p>
       ) : null}
@@ -168,7 +168,7 @@ function Hero({ onCopyEmail }) {
             </p>
           </div>
           <figure className="hero-peg-visual" aria-label="Interactive laptop with a tilting screen and pressable keys">
-            <HairlineFigure source={heroWorkstation} className="hero-peg-frame" title="Interactive laptop figure. Move over the screen to tilt it, click the screen to open or close it, and hover keys to press them." initialReadout="Move over the laptop to tilt its screen and press its keys." showCaption={false} />
+            <HairlineFigure source={heroWorkstation} className="hero-peg-frame" title="Interactive laptop figure. Move over the screen to tilt it, click the screen to open or close it, and hover keys to press them." initialReadout="Move over the laptop to tilt its screen and press its keys." showCaption={false} loading="eager" />
           </figure>
         </div>
         <div className="hero-actions-row">

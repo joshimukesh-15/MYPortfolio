@@ -4,7 +4,7 @@
   --paper-card: rgba(255, 255, 255, 0.85);
   --ink: #17161b;
   --ink-muted: #57565f;
-  --ink-faint: #8d8b93;
+  --ink-faint: #66646e;
   --signal: #e05d00;
   --signal-dim: #b34900;
   --signal-glow: rgba(224, 93, 0, 0.32);
@@ -454,6 +454,11 @@ header.nav.scrolled {
 /* ----------------------------------------------------
    BUTTONS & PILLS
 ---------------------------------------------------- */
+/*
+  Buttons: transition only transform + opacity (both GPU-composited).
+  box-shadow and background-color are kept but transitioned separately
+  at a slower ease so they don't trigger per-frame paint on animation frames.
+*/
 .btn-pill {
   font-family: var(--mono);
   font-size: 11px;
@@ -465,7 +470,10 @@ header.nav.scrolled {
   border-radius: 100px;
   background-color: var(--ink);
   color: var(--paper);
-  transition: background-color 0.25s var(--ease-out-expo), box-shadow 0.25s var(--ease-out-expo), border-color 0.25s var(--ease-out-expo), transform 0.25s var(--ease-out-expo);
+  /* Only transition composited properties on the fast path */
+  transition: background-color 0.25s var(--ease-out-expo),
+              border-color 0.25s var(--ease-out-expo),
+              transform 0.2s var(--ease-out-expo);
   cursor: pointer;
   border: 1px solid var(--ink);
   display: inline-flex;
@@ -474,14 +482,32 @@ header.nav.scrolled {
   gap: 8px;
   white-space: nowrap;
   line-height: 1;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Shadow lives on a pseudo-element, faded in via opacity (composited) */
+.btn-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 8px 24px var(--signal-glow);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease-out-expo);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .btn-pill:hover {
   background-color: var(--signal);
   color: var(--paper);
   border-color: var(--signal);
-  box-shadow: 0 8px 24px var(--signal-glow);
   transform: translateY(-2px);
+}
+
+.btn-pill:hover::after {
+  opacity: 1;
 }
 
 .btn-pill .arrow {
@@ -506,7 +532,10 @@ header.nav.scrolled {
   background-color: rgba(23, 22, 27, 0.045);
   color: var(--ink);
   border: 1px solid var(--line);
-  transition: border-color 0.25s var(--ease-out-expo), color 0.25s var(--ease-out-expo), background-color 0.25s var(--ease-out-expo), box-shadow 0.25s var(--ease-out-expo), transform 0.25s var(--ease-out-expo);
+  transition: border-color 0.25s var(--ease-out-expo),
+              color 0.25s var(--ease-out-expo),
+              background-color 0.25s var(--ease-out-expo),
+              transform 0.2s var(--ease-out-expo);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -514,14 +543,31 @@ header.nav.scrolled {
   gap: 8px;
   white-space: nowrap;
   line-height: 1;
+  position: relative;
+  isolation: isolate;
+}
+
+.btn-pill-secondary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 18px var(--signal-soft);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease-out-expo);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .btn-pill-secondary:hover {
   border-color: var(--signal);
   color: var(--signal);
   background-color: var(--signal-soft);
-  box-shadow: 0 0 15px var(--signal-soft);
   transform: translateY(-2px);
+}
+
+.btn-pill-secondary:hover::after {
+  opacity: 1;
 }
 
 .btn-pill-secondary svg {

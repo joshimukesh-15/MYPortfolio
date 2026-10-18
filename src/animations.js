@@ -167,50 +167,50 @@ export function initPortfolioAnimations() {
       }
     }, { passive: true });
 
-    // Hero Entrance Timeline
+    // Hero Entrance Timeline (Optimized for instant FCP/LCP)
     const nameWords = splitIntoWords(document.querySelector('#hero-title .name-line'));
     const italicWords = splitIntoWords(document.querySelector('#hero-title .italic-line'));
 
-    const heroTL = gsap.timeline({ defaults: { ease: 'power3.out', duration: isTouch ? 0.65 : 1.0 } });
+    const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
     heroTL
-      .from('.nav-inner', {
-        y: -20,
-        opacity: 0,
-        duration: isTouch ? 0.55 : 0.8
-      })
-      .from('#hero-eyebrow', {
-        y: 15,
-        opacity: 0,
-        duration: isTouch ? 0.5 : 0.7
-      }, '-=0.4')
       .from(nameWords, {
-        y: 24,
+        y: isTouch ? 12 : 20,
         opacity: 0,
-        duration: 0.5,
-        stagger: 0.05
-      }, '-=0.5')
+        duration: isTouch ? 0.35 : 0.55,
+        stagger: isTouch ? 0.02 : 0.04
+      }, 0)
       .from(italicWords, {
-        y: 24,
+        y: isTouch ? 12 : 20,
         opacity: 0,
-        duration: 0.5,
-        stagger: 0.05
-      }, '-=0.4')
+        duration: isTouch ? 0.35 : 0.55,
+        stagger: isTouch ? 0.02 : 0.04
+      }, isTouch ? 0.08 : 0.12)
+      .from('.nav-inner', {
+        y: -16,
+        opacity: 0,
+        duration: isTouch ? 0.4 : 0.6
+      }, 0)
+      .from('#hero-eyebrow', {
+        y: 12,
+        opacity: 0,
+        duration: isTouch ? 0.35 : 0.5
+      }, 0.04)
       .from('#hero-lead', {
-        y: 20,
+        y: 14,
         opacity: 0,
-        duration: 0.8
-      }, '-=0.6')
+        duration: isTouch ? 0.4 : 0.6
+      }, isTouch ? 0.12 : 0.2)
       .from('#hero-actions', {
-        y: 15,
+        y: 12,
         opacity: 0,
-        duration: 0.7
-      }, '-=0.6')
+        duration: isTouch ? 0.35 : 0.5
+      }, isTouch ? 0.18 : 0.28)
       .from('.metrics-strip', {
         opacity: 0,
-        y: 20,
-        duration: 0.8
-      }, '-=0.4');
+        y: 14,
+        duration: isTouch ? 0.4 : 0.6
+      }, isTouch ? 0.22 : 0.36);
 
     // Section Titles Reveal
     document.querySelectorAll('.s-title, .cta-title').forEach((title) => {
