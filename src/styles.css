@@ -2103,32 +2103,26 @@ section {
   contain: layout style;
 }
 
-/* Cards: contain paint so hover effects don't repaint siblings */
+/*
+  Cards: contain layout + style only.
+  Do NOT use contain:paint — it clips overflow and
+  creates an implicit scrollable container that traps
+  hairline iframes and buttons inside them.
+*/
 .cert-card,
 .project-card-interactive,
 .project-panel,
 .about-text,
 .about-facts {
-  contain: layout style paint;
+  contain: layout style;
 }
 
 /* ----------------------------------------------------
    PERFORMANCE: STABLE IFRAME DIMENSIONS (prevents CLS)
-   Aspect-ratio reserves space before iframe loads so
-   the page layout doesn't shift (Cumulative Layout Shift).
+   aspect-ratio is already set on .hairline-frame at
+   line 542 with the GPU transform hack intact.
+   Extra per-figure overrides only:
 ---------------------------------------------------- */
-.hairline-frame {
-  display: block;
-  width: 100%;
-  border: none;
-  background: transparent;
-  aspect-ratio: 5 / 4;
-}
-
-.hero-peg-frame {
-  aspect-ratio: 5 / 4;
-}
-
 .project-rack-frame {
   aspect-ratio: 4 / 5;
 }
