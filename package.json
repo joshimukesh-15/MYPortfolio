@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prod": "vite build && vite preview --port 5173"
   },
   "dependencies": {
     "gsap": "^3.15.0",
