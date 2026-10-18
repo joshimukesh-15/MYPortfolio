@@ -4,76 +4,150 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f5f1" />
+
+    <!-- Primary SEO -->
     <title>Mukesh Joshi — Full-Stack &amp; AI Software Engineer</title>
-    
-    <!-- Primary SEO Meta Tags -->
     <meta name="title" content="Mukesh Joshi — Full-Stack &amp; AI Software Engineer" />
-    <meta name="description" content="Portfolio of Mukesh Joshi — BCA (Hons) student graduating in 2028, building full-stack applications with Python, FastAPI, PostgreSQL, React, and Corrective RAG AI systems. Open to software development internships." />
-    <meta name="keywords" content="Mukesh Joshi, Full-Stack Developer, Software Engineer, Python, FastAPI, React, PostgreSQL, RAG, Portfolio, Ganpat University" />
+    <meta name="description" content="Portfolio of Mukesh Joshi — BCA (Hons) student at Ganpat University graduating in 2028, building full-stack apps with Python, FastAPI, PostgreSQL, React, and Corrective RAG AI. Open to software development internships." />
+    <meta name="keywords" content="Mukesh Joshi, Full-Stack Developer, Software Engineer, Python, FastAPI, React, PostgreSQL, RAG, LangChain, ChromaDB, Portfolio, Ganpat University, Gujarat, Internship" />
     <meta name="author" content="Mukesh Joshi" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <link rel="canonical" href="https://mukeshjoshi.vercel.app/" />
 
-    <!-- Favicon (Absolute Root Path) -->
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Fallback PNG favicon for Safari / older browsers -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg" />
 
-    <!-- Google Fonts: Fraunces, Instrument Sans, IBM Plex Mono -->
+    <!-- Performance: preconnect to Google Fonts origin -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Open Graph / LinkedIn / WhatsApp / Discord -->
+    <!--
+      Google Fonts — subset to only weights/styles actually used:
+        Fraunces: opsz 9..144, weights 300–600, normal + italic
+        Instrument Sans: weights 400 500 600 700, normal only
+        IBM Plex Mono: weights 400 500 600, normal only
+      display=swap prevents invisible text during font load (good for CLS/LCP)
+    -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Open Graph — LinkedIn / WhatsApp / Discord / Slack -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mukeshjoshi.vercel.app/" />
     <meta property="og:title" content="Mukesh Joshi — Full-Stack &amp; AI Software Engineer" />
-    <meta property="og:description" content="Portfolio of Mukesh Joshi — BCA (Hons) student graduating in 2028, building full-stack applications with Python, FastAPI, PostgreSQL, React, and Corrective RAG AI systems." />
+    <meta property="og:description" content="BCA student at Ganpat University (2028) building full-stack apps with Python, FastAPI, PostgreSQL, React, and self-correcting Corrective RAG AI systems." />
     <meta property="og:image" content="https://mukeshjoshi.vercel.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Mukesh Joshi — Full-Stack &amp; AI Software Engineer portfolio preview" />
     <meta property="og:site_name" content="Mukesh Joshi Portfolio" />
+    <meta property="og:locale" content="en_IN" />
 
-    <!-- Twitter / X -->
+    <!-- Twitter / X Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://mukeshjoshi.vercel.app/" />
     <meta name="twitter:title" content="Mukesh Joshi — Full-Stack &amp; AI Software Engineer" />
-    <meta name="twitter:description" content="Portfolio of Mukesh Joshi — BCA (Hons) student building full-stack applications with Python, FastAPI, PostgreSQL, and React." />
+    <meta name="twitter:description" content="BCA student building full-stack apps with Python, FastAPI, PostgreSQL, React, and Corrective RAG AI. Open to internships." />
     <meta name="twitter:image" content="https://mukeshjoshi.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="Mukesh Joshi portfolio preview card" />
+    <meta name="twitter:creator" content="@mukeshjoshi" />
 
-    <!-- Structured Data (JSON-LD) for Search Engines -->
+    <!-- Schema.org Person — rich results for Google Knowledge Graph -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Mukesh Joshi",
-        "url": "https://mukeshjoshi.vercel.app/",
-        "jobTitle": "Software Engineer",
-        "email": "mailto:joshimukesh2005@gmail.com",
-        "alumniOf": {
-          "@type": "CollegeOrUniversity",
-          "name": "Ganpat University"
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Mukesh Joshi",
+      "url": "https://mukeshjoshi.vercel.app/",
+      "image": "https://mukeshjoshi.vercel.app/og-image.png",
+      "jobTitle": "Full-Stack & AI Software Engineer",
+      "description": "BCA (Hons) student at Ganpat University graduating in 2028, building full-stack web applications with Python, FastAPI, PostgreSQL, React, and Corrective RAG AI systems.",
+      "email": "joshimukesh2005@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Gujarat",
+        "addressCountry": "IN"
+      },
+      "alumniOf": {
+        "@type": "CollegeOrUniversity",
+        "name": "Ganpat University",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Gujarat",
+          "addressCountry": "IN"
+        }
+      },
+      "knowsAbout": [
+        "Python", "FastAPI", "PostgreSQL", "React.js",
+        "LangChain", "ChromaDB", "WebSockets",
+        "Corrective RAG", "Full-Stack Web Development",
+        "Multi-Tenant Architecture", "JWT Authentication"
+      ],
+      "hasCredential": [
+        {
+          "@type": "EducationalOccupationalCredential",
+          "name": "Data Science Essentials with Python",
+          "credentialCategory": "Certificate",
+          "recognizedBy": { "@type": "Organization", "name": "Cisco Networking Academy" },
+          "dateCreated": "2026-04"
         },
-        "knowsAbout": ["Python", "FastAPI", "PostgreSQL", "React.js", "LangChain", "ChromaDB", "WebSockets"],
-        "sameAs": [
-          "https://github.com/joshimukesh-15",
-          "https://www.linkedin.com/in/mukesh-joshi-433290379/"
-        ]
+        {
+          "@type": "EducationalOccupationalCredential",
+          "name": "Introduction to Data Science",
+          "credentialCategory": "Certificate",
+          "recognizedBy": { "@type": "Organization", "name": "Cisco Networking Academy" },
+          "dateCreated": "2026-02"
+        }
+      ],
+      "sameAs": [
+        "https://github.com/joshimukesh-15",
+        "https://www.linkedin.com/in/mukesh-joshi-433290379/"
+      ]
+    }
+    </script>
+
+    <!-- Schema.org WebSite — enables Google Sitelinks Search Box -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Mukesh Joshi Portfolio",
+      "url": "https://mukeshjoshi.vercel.app/",
+      "author": {
+        "@type": "Person",
+        "name": "Mukesh Joshi"
       }
+    }
     </script>
   </head>
   <body>
     <div id="root"></div>
 
-    <!-- Fallback for non-JS scrapers and parsers -->
+    <!-- Static fallback for JS-disabled crawlers (Googlebot, scrapers, RSS readers) -->
     <noscript>
-      <main style="max-width: 800px; margin: 40px auto; padding: 20px; font-family: sans-serif; line-height: 1.6;">
-        <h1>Mukesh Joshi — Software Engineer</h1>
-        <p>BCA (Hons) student at Ganpat University (graduating 2028), building full-stack web applications with Python, FastAPI, PostgreSQL, and React.js.</p>
-        <h2>Featured Projects</h2>
-        <ul>
-          <li><strong>Imperium AI:</strong> Corrective RAG application with React, FastAPI, ChromaDB, and LangChain.</li>
-          <li><strong>FlowStock:</strong> Multi-tenant inventory &amp; order management platform with FastAPI, PostgreSQL, and WebSockets.</li>
+      <main style="max-width:820px;margin:48px auto;padding:24px 20px;font-family:system-ui,sans-serif;line-height:1.65;color:#17161b">
+        <h1 style="font-size:2rem;margin-bottom:.5rem">Mukesh Joshi — Full-Stack &amp; AI Software Engineer</h1>
+        <p style="color:#57565f;margin-bottom:1.5rem">BCA (Hons) student at <strong>Ganpat University</strong> (graduating 2028), building production-grade full-stack web applications with <strong>Python, FastAPI, PostgreSQL, and React.js</strong>. Open to software development internships.</p>
+
+        <h2 style="font-size:1.25rem;margin-bottom:.75rem">Featured Projects</h2>
+        <ul style="padding-left:1.25rem;margin-bottom:1.5rem">
+          <li style="margin-bottom:.5rem"><strong>Imperium AI</strong> — Corrective RAG application with React, FastAPI, ChromaDB, BM25 hybrid search, and LangChain.</li>
+          <li><strong>FlowStock</strong> — Multi-tenant inventory &amp; order management SaaS with FastAPI, PostgreSQL, JWT RBAC, and WebSockets.</li>
         </ul>
-        <p>Email: <a href="mailto:joshimukesh2005@gmail.com">joshimukesh2005@gmail.com</a> | <a href="https://github.com/joshimukesh-15">GitHub</a> | <a href="https://www.linkedin.com/in/mukesh-joshi-433290379/">LinkedIn</a></p>
+
+        <h2 style="font-size:1.25rem;margin-bottom:.75rem">Skills</h2>
+        <p style="margin-bottom:1.5rem">Python · FastAPI · PostgreSQL · React.js · LangChain · ChromaDB · WebSockets · JWT · Tailwind CSS · Git</p>
+
+        <h2 style="font-size:1.25rem;margin-bottom:.75rem">Contact</h2>
+        <p>
+          Email: <a href="mailto:joshimukesh2005@gmail.com" style="color:#e05d00">joshimukesh2005@gmail.com</a> ·
+          <a href="https://github.com/joshimukesh-15" style="color:#e05d00">GitHub</a> ·
+          <a href="https://www.linkedin.com/in/mukesh-joshi-433290379/" style="color:#e05d00">LinkedIn</a>
+        </p>
       </main>
     </noscript>
 

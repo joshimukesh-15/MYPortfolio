@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Block crawling of assets that add no SEO value
+Disallow: /figures/
+
+Sitemap: https://mukeshjoshi.vercel.app/sitemap.xml

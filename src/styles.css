@@ -2062,3 +2062,77 @@ section {
     animation: none !important;
   }
 }
+
+/* ----------------------------------------------------
+   PERFORMANCE: GPU COMPOSITING HINTS
+   Promote animated elements to compositor layers to
+   avoid expensive layout/paint on every frame.
+---------------------------------------------------- */
+.nav-cta,
+.btn-pill,
+.btn-pill-secondary,
+.btn-pill-light,
+.btn-pill-sm,
+.btn-pill-sm-secondary,
+.cta-email-btn,
+.cert-card,
+.about-text,
+.about-facts,
+.nav-slide-indicator,
+.top-slider-bar {
+  will-change: transform;
+}
+
+/* ----------------------------------------------------
+   PERFORMANCE: LAYOUT CONTAINMENT
+   Sections below the fold skip rendering until they
+   approach the viewport (cuts initial paint cost).
+   Hero and About are excluded — they're above the fold.
+---------------------------------------------------- */
+#skills,
+#certifications,
+#education,
+.cta,
+.footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px;
+}
+
+/* Limit reflow scope to within each section */
+section {
+  contain: layout style;
+}
+
+/* Cards: contain paint so hover effects don't repaint siblings */
+.cert-card,
+.project-card-interactive,
+.project-panel,
+.about-text,
+.about-facts {
+  contain: layout style paint;
+}
+
+/* ----------------------------------------------------
+   PERFORMANCE: STABLE IFRAME DIMENSIONS (prevents CLS)
+   Aspect-ratio reserves space before iframe loads so
+   the page layout doesn't shift (Cumulative Layout Shift).
+---------------------------------------------------- */
+.hairline-frame {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  aspect-ratio: 5 / 4;
+}
+
+.hero-peg-frame {
+  aspect-ratio: 5 / 4;
+}
+
+.project-rack-frame {
+  aspect-ratio: 4 / 5;
+}
+
+.cta-bridge-card .hairline-frame {
+  aspect-ratio: 7 / 4;
+}
