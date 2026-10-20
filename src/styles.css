@@ -1246,9 +1246,15 @@ section {
 
 .skills-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
-  align-items: center;
-  gap: clamp(28px, 4vw, 56px);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+  align-items: start;
+  gap: clamp(28px, 4vw, 40px);
+}
+
+/* The SkillShelfFigure renders its own .hairline-card.skill-shelf-card */
+.skill-shelf-card {
+  position: sticky;
+  top: 110px;
 }
 
 .skills-figure-card {
@@ -1259,11 +1265,13 @@ section {
   box-shadow: 0 8px 24px rgba(23, 22, 27, 0.05);
 }
 
-.skill-row.is-selected {
+.skill-row.is-selected,
+.skill-row.is-active {
   background-color: var(--signal-soft);
 }
 
-.skill-tag.is-selected {
+.skill-tag.is-selected,
+.skill-tag.is-lit {
   color: var(--signal);
   text-shadow: 0 0 14px var(--signal-glow);
 }
@@ -1613,6 +1621,12 @@ section {
   align-items: center;
 }
 
+/* New FooterMailboxFigure card sizing */
+.footer-mailbox-card {
+  width: 100%;
+  max-width: 340px;
+}
+
 .contact-mailbox {
   width: min(100%, 300px);
 }
@@ -1901,6 +1915,13 @@ section {
   }
   .skills-figure-card {
     max-width: 520px;
+    width: 100%;
+    margin-inline: auto;
+  }
+  /* SkillShelfFigure card on mobile */
+  .skill-shelf-card {
+    position: static;
+    max-width: 420px;
     width: 100%;
     margin-inline: auto;
   }

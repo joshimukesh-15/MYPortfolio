@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initPortfolioAnimations } from './animations.js';
-import { BookshelfFigure, MailboxFigure } from './components/HairlineFigures.jsx';
+import SkillShelfFigure from './components/SkillShelfFigure.jsx';
+import FooterMailboxFigure from './components/FooterMailboxFigure.jsx';
 import './styles.css';
 
 const EMAIL = 'joshimukesh2005@gmail.com';
@@ -374,16 +375,17 @@ function ProjectsSection() {
 }
 
 
-const skillGroups = [
-  { name: 'Languages', skills: ['Python', 'JavaScript (ES6+)', 'SQL', 'HTML5 & CSS3'] },
-  { name: 'Backend & Data', skills: ['FastAPI', 'PostgreSQL', 'RESTful APIs', 'WebSockets', 'JWT & RBAC'] },
-  { name: 'AI & Retrieval', skills: ['LangChain', 'ChromaDB', 'Corrective RAG', 'Hybrid Search (BM25 + Vector)'] },
-  { name: 'Frontend', skills: ['React.js', 'Tailwind CSS', 'Bootstrap', 'GSAP Animations', 'Responsive UI'] },
-  { name: 'Architecture & Tools', skills: ['Git & GitHub', 'Multi-Tenant Design', 'OOP', 'VS Code'] },
+// Skill groups: 4 groups with counts 5, 5, 4, 5 to match the SkillShelfFigure bookcase layout.
+const SKILL_TITLES = ['Languages', 'Backend & Data', 'AI & Retrieval', 'Tools'];
+const SKILL_GROUPS = [
+  ['Python', 'JavaScript (ES6+)', 'SQL', 'HTML5 & CSS3', 'TypeScript'],
+  ['FastAPI', 'PostgreSQL', 'RESTful APIs', 'WebSockets', 'JWT & RBAC'],
+  ['LangChain', 'ChromaDB', 'Corrective RAG', 'Hybrid Search (BM25 + Vector)'],
+  ['React.js', 'Tailwind CSS', 'Git & GitHub', 'Docker', 'VS Code'],
 ];
 
 function SkillsSection() {
-  const [activeSkill, setActiveSkill] = useState(null);
+  const [pick, setPick] = useState(null); // { group, skill } while hovered, else null
 
   return (
     <section id="skills">
@@ -398,16 +400,14 @@ function SkillsSection() {
         </div>
         <div className="skills-layout">
           <div className="skills-wrap">
-            {skillGroups.map((group, groupIndex) => (
-              <div className={`skill-row${activeSkill?.group === groupIndex ? ' is-selected' : ''}`} key={group.name}>
-                <div className="skill-cat">{group.name}</div>
+            {SKILL_GROUPS.map((skills, groupIndex) => (
+              <div className={`skill-row${pick?.group === groupIndex ? ' is-active' : ''}`} key={SKILL_TITLES[groupIndex]}>
+                <div className="skill-cat">{SKILL_TITLES[groupIndex]}</div>
                 <div className="skill-items">
-                  {group.skills.map((skill, skillIndex) => (
+                  {skills.map((skill, skillIndex) => (
                     <span
-                      className={`skill-tag${activeSkill?.group === groupIndex && activeSkill?.skillIndex === skillIndex ? ' is-selected' : ''}`}
+                      className={`skill-tag${pick?.group === groupIndex && pick.skill === skillIndex ? ' is-lit' : ''}`}
                       key={skill}
-                      onPointerEnter={() => setActiveSkill({ group: groupIndex, skillIndex })}
-                      onPointerLeave={() => setActiveSkill(null)}
                     >
                       {skill}
                     </span>
@@ -416,9 +416,11 @@ function SkillsSection() {
               </div>
             ))}
           </div>
-          <aside className="hairline-card skills-figure-card" aria-label="Interactive skills bookshelf">
-            <BookshelfFigure groups={skillGroups} activeSkill={activeSkill} onSelect={setActiveSkill} />
-          </aside>
+          <SkillShelfFigure
+            titles={SKILL_TITLES}
+            skills={SKILL_GROUPS}
+            onSelect={setPick}
+          />
         </div>
       </div>
     </section>
@@ -511,7 +513,7 @@ function ContactSection({ onCopyEmail }) {
           </div>
         </div>
         <aside className="cta-mailbox-wrap" aria-label="Interactive mailbox">
-          <MailboxFigure className="contact-mailbox" />
+          <FooterMailboxFigure email={EMAIL} />
         </aside>
       </div>
     </section>
