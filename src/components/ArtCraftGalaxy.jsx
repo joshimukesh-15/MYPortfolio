@@ -344,11 +344,17 @@ export default function ArtCraftGalaxy() {
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return undefined;
+    let disposed = false;
+    let animId;
+    let cleanupFn = null;
 
-    let width = container.clientWidth || window.innerWidth;
-    let height = container.clientHeight || window.innerHeight;
+    const startGalaxy = () => {
+      if (disposed) return;
+      const container = mountRef.current;
+      if (!container) return;
+
+      let width = container.clientWidth || window.innerWidth;
+      let height = container.clientHeight || window.innerHeight;
 
     // 1. Scene, Camera & WebGLRenderer
     const scene = new THREE.Scene();
@@ -645,7 +651,7 @@ export default function ArtCraftGalaxy() {
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-    return () => {
+    cleanupFn = () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', onResize);
       renderer.domElement.removeEventListener('pointermove', onPointerMove);
@@ -664,6 +670,16 @@ export default function ArtCraftGalaxy() {
       if (renderer.domElement.parentElement) {
         renderer.domElement.parentElement.removeChild(renderer.domElement);
       }
+    };
+    };
+
+    // Defer WebGL initialization by 40ms so initial HTML, CSS, fonts, and LCP paint first without main-thread blocking
+    const timer = window.setTimeout(startGalaxy, 40);
+
+    return () => {
+      disposed = true;
+      window.clearTimeout(timer);
+      if (cleanupFn) cleanupFn();
     };
   }, []);
 

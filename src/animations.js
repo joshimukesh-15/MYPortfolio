@@ -164,9 +164,7 @@ export function initPortfolioAnimations() {
       const bladeStart = 'inset(-20% 0 -20% 100%)';
       const bladeEnd = 'inset(-20% 0 -20% 0%)';
 
-      if (wmLetters.length) {
-        gsap.set(wmLetters, { opacity: 0 });
-
+      if (wmLetters.length && !isTouch) {
         const runIntro = () => {
           const total = wordmark.offsetWidth;
           const firstWidth = wmLetters[0].offsetWidth;
@@ -178,7 +176,7 @@ export function initPortfolioAnimations() {
 
           const startShift = -(total - firstWidth) - wordmark.offsetHeight * 0.12;
 
-          const intro = gsap.timeline({ delay: 0.12 });
+          const intro = gsap.timeline();
 
           intro
             .fromTo(
@@ -188,7 +186,7 @@ export function initPortfolioAnimations() {
                 x: 0,
                 opacity: 1,
                 clipPath: bladeEnd,
-                duration: 1.15,
+                duration: 0.9,
                 ease: 'power3.inOut',
               },
               0
@@ -200,9 +198,9 @@ export function initPortfolioAnimations() {
                 x: 0,
                 opacity: 1,
                 clipPath: bladeEnd,
-                duration: 1.2,
+                duration: 0.95,
                 ease: 'power3.inOut',
-                stagger: 0.012,
+                stagger: 0.01,
                 onComplete: () => {
                   gsap.set(wmLetters, { clearProps: 'transform,opacity,clipPath' });
                 },
@@ -211,22 +209,28 @@ export function initPortfolioAnimations() {
             )
             .fromTo(
               stageBits,
-              { y: 18, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.85, stagger: 0.07, ease: 'power3.out' },
-              0.55
+              { y: 14, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.65, stagger: 0.05, ease: 'power3.out' },
+              0.4
             )
             .fromTo(
               '.hero-scroll',
               { opacity: 0 },
-              { opacity: 1, duration: 0.6, ease: 'power2.out' },
-              0.95
+              { opacity: 1, duration: 0.5, ease: 'power2.out' },
+              0.75
             );
         };
 
-        const fontsReady = document.fonts?.ready ?? Promise.resolve();
-        fontsReady
-          .then(() => window.requestAnimationFrame(runIntro))
-          .catch(() => window.requestAnimationFrame(runIntro));
+        // Don't wait on slow networks; start animation promptly to keep LCP fast
+        const fontTimeout = new Promise((resolve) => window.setTimeout(resolve, 60));
+        const fontsReady = document.fonts?.ready
+          ? Promise.race([document.fonts.ready, fontTimeout])
+          : Promise.resolve();
+
+        fontsReady.then(() => window.requestAnimationFrame(runIntro));
+      } else {
+        // Immediate paint on mobile/touch for instantaneous LCP
+        gsap.set(wmLetters, { opacity: 1 });
       }
 
       /* Dock the wordmark to the top-right rail while scrolling */
