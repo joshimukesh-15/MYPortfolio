@@ -954,7 +954,7 @@ function Footer() {
 
       <div className="footer-base">
         <span className="hud-label">© {new Date().getFullYear()} Mukesh Joshi</span>
-        <span className="hud-label">Designed in the ArtCraft spirit</span>
+        <span className="hud-label">Engineered for performance &amp; precision</span>
       </div>
     </footer>
   );
