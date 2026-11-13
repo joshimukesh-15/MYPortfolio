@@ -46,9 +46,9 @@ export const GALAXY_TILES = [
     shadowColor: 'rgba(168, 85, 247, 0.45)',
   },
   {
-    id: 'imperium',
-    name: 'Imperium AI',
-    subtitle: 'Self-Correcting RAG',
+    id: 'glint',
+    name: 'Glint',
+    subtitle: 'Continuous CRAG Platform',
     colors: ['#e11d48', '#fb7185'],
     shadowColor: 'rgba(251, 113, 133, 0.45)',
   },
@@ -169,23 +169,40 @@ function drawTileIcon(ctx, id) {
       ctx.stroke();
       break;
     }
+    case 'glint':
     case 'imperium': {
-      // Shield with checkmark
-      ctx.lineWidth = 5;
+      // Glint 4-pointed sparkle star ✨
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.moveTo(0, -32);
-      ctx.lineTo(26, -18);
-      ctx.lineTo(26, 6);
-      ctx.quadraticCurveTo(26, 26, 0, 34);
-      ctx.quadraticCurveTo(-26, 26, -26, 6);
-      ctx.lineTo(-26, -18);
+      const rOuter = 30;
+      const rInner = 8;
+      for (let i = 0; i < 8; i++) {
+        const radius = i % 2 === 0 ? rOuter : rInner;
+        const angle = (i * Math.PI) / 4 - Math.PI / 2;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
       ctx.closePath();
-      ctx.stroke();
+      ctx.fill();
+
+      // Top-right companion sparkle
       ctx.beginPath();
-      ctx.moveTo(-11, 2);
-      ctx.lineTo(-2, 11);
-      ctx.lineTo(12, -7);
-      ctx.stroke();
+      const sx = 18;
+      const sy = -18;
+      const srOuter = 10;
+      const srInner = 3;
+      for (let i = 0; i < 8; i++) {
+        const radius = i % 2 === 0 ? srOuter : srInner;
+        const angle = (i * Math.PI) / 4 - Math.PI / 2;
+        const x = sx + Math.cos(angle) * radius;
+        const y = sy + Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
       break;
     }
     case 'flowstock': {
@@ -314,8 +331,9 @@ const RIBBON_FRAGMENT_SHADER = `
   void main() {
     float edge = 1.0 - smoothstep(0.45, 1.0, abs(vSide));
     float g = clamp(vG, 0.0, 1.0);
+    vec3 baseCol = hueRotate(uColor, vArm * uHue * 6.28318);
     vec3 pulseCol = hueRotate(uPulseColor, vArm * uHue * 6.28318);
-    vec3 col = mix(uColor, pulseCol, g);
+    vec3 col = mix(baseCol, pulseCol, g);
     gl_FragColor = vec4(col, (uAlpha + uPulseAlpha * vG) * edge);
   }
 `;
@@ -368,7 +386,7 @@ export default function ArtCraftGalaxy() {
 
     // Theme color detection
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const baseLineColor = isDark ? new THREE.Color(0.85, 0.84, 0.82) : new THREE.Color(0.12, 0.12, 0.14);
+    const baseLineColor = isDark ? new THREE.Color(0.74, 0.52, 0.98) : new THREE.Color(0.18, 0.45, 0.94);
     const pulseAccentColor = isDark ? new THREE.Color(0.22, 0.74, 0.97) : new THREE.Color(0.145, 0.388, 0.922);
 
     // 3. Ribbon ShaderMaterial
@@ -378,15 +396,15 @@ export default function ArtCraftGalaxy() {
       uniforms: {
         uTime: { value: 0 },
         uSpeed: { value: 0.22 },
-        uWidth: { value: 0.035 },
-        uCount: { value: 2.0 },
-        uBaseW: { value: 1.8 },
-        uPulseW: { value: 4.2 },
+        uWidth: { value: 0.05 },
+        uCount: { value: 3.0 },
+        uBaseW: { value: 1.7 },
+        uPulseW: { value: 5.0 },
         uColor: { value: baseLineColor },
-        uAlpha: { value: isDark ? 0.35 : 0.65 },
+        uAlpha: { value: isDark ? 0.4 : 0.5 },
         uPulseColor: { value: pulseAccentColor },
-        uPulseAlpha: { value: 0.9 },
-        uHue: { value: 0.28 },
+        uPulseAlpha: { value: isDark ? 1 : 0.95 },
+        uHue: { value: 0.9 },
       },
       transparent: true,
       side: THREE.DoubleSide,
@@ -492,7 +510,7 @@ export default function ArtCraftGalaxy() {
 
     // 7. 3D Textured Squircle Cards
     const cardMeshes = [];
-    const cardSize = width < 768 ? 58 : 74;
+    const cardSize = width < 768 ? 60 : 84;
     const cardGeom = new THREE.PlaneGeometry(cardSize, cardSize);
 
     GALAXY_TILES.forEach((tile, i) => {
@@ -620,8 +638,8 @@ export default function ArtCraftGalaxy() {
     // Theme Change Handler
     const observer = new MutationObserver(() => {
       const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-      ribbonMaterial.uniforms.uColor.value.set(dark ? 0xd4d4d8 : 0x1e1e22);
-      ribbonMaterial.uniforms.uAlpha.value = dark ? 0.35 : 0.65;
+      ribbonMaterial.uniforms.uColor.value.set(dark ? 0xbd85fa : 0x2e73f0);
+      ribbonMaterial.uniforms.uAlpha.value = dark ? 0.4 : 0.5;
       ribbonMaterial.uniforms.uPulseColor.value.set(dark ? 0x38bdf8 : 0x2563eb);
       tickMat.color.set(dark ? 0xffffff : 0x121214);
     });

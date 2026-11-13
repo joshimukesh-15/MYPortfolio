@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0b0c" />
+    <meta name="theme-color" content="#f2f1ee" />
     <meta name="google-site-verification" content="mDibya_MZi4Sh6-8Ixsj9wDyBojN3maTZAD-UCbLSzs" />
 
     <!-- Primary SEO -->
@@ -28,6 +28,10 @@
       display=swap in the URL ensures text is visible in fallback
       fonts immediately (FOUT, not FOIT).
     -->
+    <!--
+      ArtCraft type system: Archivo (display, width axis), Instrument Serif
+      (editorial italics), Inter (body) and Geist Mono (HUD labels).
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -35,12 +39,12 @@
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Geist+Mono:wght@100..900&family=Instrument+Serif:ital@0;1&family=Inter:wght@100..900&display=swap"
     />
 
     <!-- Step 2: Load as print (non-blocking), swap to all once loaded -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Geist+Mono:wght@100..900&family=Instrument+Serif:ital@0;1&family=Inter:wght@100..900&display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
@@ -49,7 +53,7 @@
     <!-- Step 3: Fallback for no-JS environments -->
     <noscript>
       <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Geist+Mono:wght@100..900&family=Instrument+Serif:ital@0;1&family=Inter:wght@100..900&display=swap"
         rel="stylesheet"
       />
     </noscript>
@@ -157,7 +161,7 @@
 
         <h2 style="font-size:1.25rem;margin-bottom:.75rem">Featured Projects</h2>
         <ul style="padding-left:1.25rem;margin-bottom:1.5rem">
-          <li style="margin-bottom:.5rem"><strong>Imperium AI</strong> — Corrective RAG application with React, FastAPI, ChromaDB, BM25 hybrid search, and LangChain.</li>
+          <li style="margin-bottom:.5rem"><strong>Glint</strong> — Continuous Intelligence &amp; Corrective RAG platform with React, FastAPI, ChromaDB, Rank-BM25 hybrid search, and Gemini LLM.</li>
           <li><strong>FlowStock</strong> — Multi-tenant inventory &amp; order management SaaS with FastAPI, PostgreSQL, JWT RBAC, and WebSockets.</li>
         </ul>
 

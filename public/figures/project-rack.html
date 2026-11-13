@@ -992,7 +992,7 @@ function mount({ stage, svg, read }, value) {
     }
     return -1;
   }
-  const send = i => window.parent.postMessage({ type: 'hairline-project-open', project: i >= 6 ? 'flowstock' : 'imperium', blade: i + 1 }, '*');
+  const send = i => window.parent.postMessage({ type: 'hairline-project-open', project: i >= 6 ? 'flowstock' : 'glint', blade: i + 1 }, '*');
   function select(i, open = false) {
     if (i === active) { if (open && i >= 0) send(i); return; }
     active = i;
