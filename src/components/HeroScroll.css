@@ -1,0 +1,372 @@
+/* ============================================================
+   ARTCRAFT-STYLE HERO & SWIRLING VORTEX ORBIT
+   ============================================================ */
+
+.hero-scroll-container {
+  position: relative;
+  /* 200vh total track: 100vh of pinned vortex scrub, then unpins */
+  height: 200vh;
+  width: 100%;
+  margin-top: -60px; /* Seamless offset for fixed header */
+}
+
+.hero-sticky-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg);
+  transition: background-color 0.3s ease;
+  z-index: 10;
+}
+
+/* ----------------------------------------------------
+   BACKGROUND WEBGL 6-ARM GALAXY CANVAS CONTAINER
+   ---------------------------------------------------- */
+.hero-webgl-canvas-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Floating tooltip for WebGL 3D cards */
+.webgl-tile-floating-tooltip {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  animation: tooltip-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tooltip-pop {
+  from { opacity: 0; transform: translate(-50%, -85%) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+}
+
+.tooltip-name {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.tooltip-sub {
+  font-family: var(--sans);
+  font-size: 8.5px;
+  color: var(--text-muted);
+  line-height: 1.1;
+}
+
+/* ----------------------------------------------------
+   CENTER CONTENT (ARTCRAFT LAYOUT)
+   ---------------------------------------------------- */
+.hero-center-content {
+  position: relative;
+  z-index: 12;
+  max-width: 880px;
+  width: 100%;
+  padding: 0 var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  pointer-events: auto;
+}
+
+/* Giant Bold Wordmark */
+.hero-wordmark-dock-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  will-change: transform;
+}
+
+.hero-giant-wordmark {
+  font-family: var(--sans);
+  font-weight: 900;
+  font-size: clamp(3.2rem, 8.8vw, 6.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  margin: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: inline-block;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+/* Fade Layer (Sub-headline, text, buttons, sub-links) */
+.hero-fade-layer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  will-change: opacity, transform;
+}
+
+.hero-subheadline {
+  font-family: var(--sans);
+  font-size: clamp(1.4rem, 2.5vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0 0 14px 0;
+  letter-spacing: -0.02em;
+}
+
+.hero-editorial-desc {
+  font-family: var(--sans);
+  font-size: clamp(0.95rem, 1.35vw, 1.05rem);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 580px;
+  margin: 0 0 28px 0;
+}
+
+.hero-editorial-desc b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------
+   ARTCRAFT TWIN SQUARE BUTTONS
+   ---------------------------------------------------- */
+.hero-square-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.btn-artcraft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 22px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 0px; /* Square corners */
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Solid Black / Light button */
+.btn-artcraft-solid {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border: 1px solid var(--btn-primary-border);
+}
+
+.btn-artcraft-solid:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--accent-glow);
+}
+
+/* Outlined button */
+.btn-artcraft-outline {
+  background: var(--btn-sec-bg);
+  color: var(--btn-sec-text);
+  border: 1px solid var(--btn-sec-border);
+}
+
+.btn-artcraft-outline:hover {
+  background: var(--surface);
+  border-color: var(--text);
+  color: var(--text);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ----------------------------------------------------
+   SUB-META STACK & TRUST BAR (ARTCRAFT PATTERN)
+   ---------------------------------------------------- */
+.hero-submeta-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 26px;
+}
+
+.submeta-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0;
+}
+
+.submeta-repo {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.submeta-link {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  transition: color 0.18s ease;
+}
+
+.submeta-link:hover {
+  color: var(--accent);
+}
+
+/* Bottom Trust Bar */
+.hero-trust-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 2px;
+}
+
+.trust-hex {
+  color: var(--accent);
+  font-size: 11px;
+}
+
+/* ----------------------------------------------------
+   BOTTOM-RIGHT SECTION NAVIGATION (ARTCRAFT PATTERN)
+   ---------------------------------------------------- */
+.artcraft-section-nav {
+  position: absolute;
+  bottom: 28px;
+  right: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  z-index: 15;
+  pointer-events: auto;
+}
+
+.asn-item {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  text-decoration: none;
+  line-height: 1.5;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.asn-item:hover {
+  color: var(--text);
+  transform: translateX(-3px);
+}
+
+/* ----------------------------------------------------
+   RESPONSIVENESS & REDUCED MOTION
+   ---------------------------------------------------- */
+@media (max-width: 860px) {
+  .hero-scroll-container {
+    height: 160vh;
+  }
+  .squircle-tile {
+    width: 58px;
+    height: 58px;
+    margin-left: -29px;
+    margin-top: -29px;
+  }
+  .squircle-tile-badge {
+    width: 58px;
+    height: 58px;
+    border-radius: 17px;
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .artcraft-section-nav {
+    display: none !important;
+  }
+  .hero-giant-wordmark {
+    font-size: clamp(2.4rem, 10vw, 4rem);
+  }
+  .hero-subheadline {
+    font-size: 1.25rem;
+  }
+  .hero-trust-bar {
+    font-size: 8.5px;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-square-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-artcraft {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-container {
+    height: auto !important;
+  }
+  .hero-sticky-stage {
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh;
+    padding: 100px 0 60px;
+  }
+  .squircle-tile,
+  .hero-orbit-stage,
+  .hero-giant-wordmark,
+  .hero-fade-layer {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}

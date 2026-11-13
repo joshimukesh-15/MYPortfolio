@@ -1,0 +1,109 @@
+/* ============================================================
+   FRAMED SECTION HEADER WITH CORNER TICK MARKS
+   ============================================================ */
+
+.framed-section-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 13px 20px;
+  margin-bottom: 48px;
+  font-family: var(--mono);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.framed-section-header:hover {
+  border-color: var(--border-bright);
+}
+
+/* Corner tick marks (+) */
+.corner-tick {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tick-tl {
+  top: -5px;
+  left: -4px;
+}
+
+.tick-tr {
+  top: -5px;
+  right: -4px;
+}
+
+.tick-bl {
+  bottom: -5px;
+  left: -4px;
+}
+
+.tick-br {
+  bottom: -5px;
+  right: -4px;
+}
+
+/* Left: "01 / PROJECTS" */
+.fsh-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.fsh-num {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.fsh-sep {
+  color: var(--text-faint);
+  opacity: 0.6;
+}
+
+.fsh-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Right: short meta text */
+.fsh-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.fsh-meta-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+@media (max-width: 640px) {
+  .framed-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+  .fsh-meta {
+    font-size: 9px;
+  }
+}

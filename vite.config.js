@@ -19,6 +19,9 @@ export default defineConfig({
           if (id.includes('node_modules/gsap')) {
             return 'vendor-gsap';
           }
+          if (id.includes('node_modules/three')) {
+            return 'vendor-three';
+          }
         },
       },
     },

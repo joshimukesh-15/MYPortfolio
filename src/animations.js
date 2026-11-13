@@ -1,3 +1,4 @@
+import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -6,12 +7,41 @@ gsap.registerPlugin(ScrollTrigger);
 export function initPortfolioAnimations() {
   const cleanups = [];
   function addManagedListener(target, type, handler, options) {
+    if (!target) return;
     target.addEventListener(type, handler, options);
     cleanups.push(() => target.removeEventListener(type, handler, options));
   }
 
   const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isTouch = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 860;
+
+  // 1. Initialize Lenis Smooth Scroll
+  let lenis = null;
+  if (!isReducedMotion) {
+    try {
+      lenis = new Lenis({
+        duration: 1.1,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        touchMultiplier: 1.2,
+      });
+
+      lenis.on('scroll', ScrollTrigger.update);
+
+      const tickerCallback = (time) => {
+        lenis.raf(time * 1000);
+      };
+      gsap.ticker.add(tickerCallback);
+      gsap.ticker.lagSmoothing(0);
+
+      cleanups.push(() => {
+        gsap.ticker.remove(tickerCallback);
+        lenis.destroy();
+      });
+    } catch (e) {
+      console.warn('Lenis init bypassed:', e);
+    }
+  }
 
   // Mobile Menu Toggle & State Helper
   const menuBtn = document.getElementById('menu-toggle');
@@ -51,39 +81,20 @@ export function initPortfolioAnimations() {
       if (target) {
         e.preventDefault();
         setMobileMenuOpen(false);
-        target.scrollIntoView({ behavior: isReducedMotion ? 'auto' : 'smooth' });
+        if (lenis && !isReducedMotion) {
+          lenis.scrollTo(target, { offset: -20, duration: 1.1 });
+        } else {
+          target.scrollIntoView({ behavior: isReducedMotion ? 'auto' : 'smooth' });
+        }
       }
     });
   });
 
-  // Safe word-split utility with DocumentFragment to prevent layout thrashing
-  function splitIntoWords(el) {
-    if (!el) return [];
-    const existing = el.querySelectorAll('span');
-    if (existing.length > 0) return existing;
-    const originalText = el.textContent;
-    const words = originalText.split(/\s+/).filter(Boolean);
-    const frag = document.createDocumentFragment();
-    words.forEach((word, i) => {
-      const s = document.createElement('span');
-      s.textContent = word;
-      s.style.display = 'inline-block';
-      frag.appendChild(s);
-      if (i < words.length - 1) frag.appendChild(document.createTextNode(' '));
-    });
-    el.textContent = '';
-    el.appendChild(frag);
-    cleanups.push(() => {
-      el.textContent = originalText;
-    });
-    return el.querySelectorAll('span');
-  }
-
-  // Wrap all GSAP animations & ScrollTriggers inside gsap.context()
+  // GSAP Context
   const ctx = gsap.context(() => {
     ScrollTrigger.config({
       limitCallbacks: true,
-      ignoreMobileResize: true
+      ignoreMobileResize: true,
     });
 
     // Top Progress Bar via ScrollTrigger
@@ -94,23 +105,78 @@ export function initPortfolioAnimations() {
         end: 'max',
         onUpdate: (self) => {
           topSliderBar.style.width = `${self.progress * 100}%`;
-        }
+        },
       });
     }
 
-    if (isReducedMotion) return;
-
-    // Navbar Scroll Transition
+    // Navbar Scrolled State
     const navEl = document.getElementById('nav');
     if (navEl) {
       ScrollTrigger.create({
         start: 'top -30',
         end: 'max',
-        onToggle: (self) => navEl.classList.toggle('scrolled', self.isActive)
+        onToggle: (self) => navEl.classList.toggle('scrolled', self.isActive),
       });
     }
 
-    // Active Section Tracking + Sliding Nav Indicator
+    // -----------------------------------------------------------------
+    // HERO SCROLL-DRIVEN ORBIT & FLIP DOCKING SCRUB
+    // -----------------------------------------------------------------
+    const heroTrack = document.getElementById('top');
+    const wordmarkEl = document.getElementById('hero-dock-wordmark');
+    const dockTargetEl = document.getElementById('nav-dock-target');
+    const fadeContentEl = document.getElementById('hero-fade-content');
+    const bottomCueEl = document.getElementById('hero-bottom-cue');
+
+    if (heroTrack && wordmarkEl && !isReducedMotion) {
+      let deltaX = 0;
+      let deltaY = 0;
+      let targetScale = 0.22;
+
+      function updateDockCoordinates() {
+        if (!dockTargetEl || !wordmarkEl) return;
+        const targetRect = dockTargetEl.getBoundingClientRect();
+        const currentRect = wordmarkEl.getBoundingClientRect();
+        deltaX = (targetRect.left + targetRect.width / 2) - (currentRect.left + currentRect.width / 2);
+        deltaY = (targetRect.top + targetRect.height / 2) - (currentRect.top + currentRect.height / 2);
+        targetScale = Math.max(0.18, Math.min(0.32, (targetRect.height * 1.5) / (currentRect.height || 1)));
+      }
+
+      updateDockCoordinates();
+      addManagedListener(window, 'resize', updateDockCoordinates, { passive: true });
+
+      ScrollTrigger.create({
+        trigger: heroTrack,
+        start: 'top top',
+        end: '+=100%',
+        pin: '.hero-sticky-stage',
+        scrub: 0.6,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          const p = self.progress;
+
+          // 1. Wordmark FLIP docking
+          const currentScale = 1 - p * (1 - targetScale);
+          const curX = deltaX * p;
+          const curY = deltaY * p;
+          wordmarkEl.style.transform = `translate3d(${curX}px, ${curY}px, 0) scale(${currentScale})`;
+
+          // 2. Center content fade & slight translation
+          if (fadeContentEl) {
+            const fadeOpacity = Math.max(0, 1 - p * 2.1);
+            fadeContentEl.style.opacity = fadeOpacity;
+            fadeContentEl.style.transform = `translate3d(0, ${-p * 45}px, 0)`;
+            fadeContentEl.style.pointerEvents = p > 0.4 ? 'none' : 'auto';
+          }
+
+          if (bottomCueEl) {
+            bottomCueEl.style.opacity = Math.max(0, 1 - p * 3);
+          }
+        },
+      });
+    }
+
+    // Active Section Tracking + Navigation Indicator + Custom Event dispatch
     const sections = document.querySelectorAll('section[id]');
     const navItems = document.querySelectorAll('.nav-links a.nav-item');
     const navLinksContainer = document.getElementById('navlinks');
@@ -135,7 +201,7 @@ export function initPortfolioAnimations() {
           left: lr.left - cr.left,
           width: lr.width,
           top: lr.bottom - cr.top,
-          opacity: 1
+          opacity: 1,
         };
 
         if (shouldAnimate) {
@@ -143,7 +209,7 @@ export function initPortfolioAnimations() {
             ...props,
             duration: 0.35,
             ease: 'power3.out',
-            overwrite: true
+            overwrite: true,
           });
         } else {
           gsap.set(navIndicator, props);
@@ -161,6 +227,9 @@ export function initPortfolioAnimations() {
           link.classList.remove('active');
         }
       });
+
+      // Dispatch event for ScrollRuler and other components
+      window.dispatchEvent(new CustomEvent('portfolio-section-change', { detail: { id } }));
     }
 
     sections.forEach((section) => {
@@ -169,7 +238,7 @@ export function initPortfolioAnimations() {
         start: 'top 45%',
         end: 'bottom 45%',
         onEnter: () => updateActiveNav(section.id),
-        onEnterBack: () => updateActiveNav(section.id)
+        onEnterBack: () => updateActiveNav(section.id),
       });
     });
 
@@ -179,100 +248,7 @@ export function initPortfolioAnimations() {
       }
     }, { passive: true });
 
-    // Hero Entrance Timeline (Optimized for instant FCP/LCP)
-    const nameWords = splitIntoWords(document.querySelector('#hero-title .name-line'));
-    const italicWords = splitIntoWords(document.querySelector('#hero-title .italic-line'));
-
-    const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-    heroTL
-      .from('.nav-inner', {
-        y: -10,
-        opacity: isTouch ? 0.85 : 0,
-        duration: isTouch ? 0.3 : 0.5
-      }, 0)
-      .from('#hero-eyebrow', {
-        y: 8,
-        opacity: isTouch ? 0.85 : 0,
-        duration: isTouch ? 0.25 : 0.45
-      }, 0.02)
-      .from('#hero-lead', {
-        y: 8,
-        opacity: isTouch ? 0.85 : 0,
-        duration: isTouch ? 0.3 : 0.5
-      }, isTouch ? 0.06 : 0.15)
-      .from('#hero-actions', {
-        y: 8,
-        opacity: isTouch ? 0.85 : 0,
-        duration: isTouch ? 0.25 : 0.45
-      }, isTouch ? 0.08 : 0.2)
-      .from('.metrics-strip', {
-        opacity: isTouch ? 0.85 : 0,
-        y: 8,
-        duration: isTouch ? 0.3 : 0.5
-      }, isTouch ? 0.1 : 0.25);
-
-    // Section Titles Reveal
-    document.querySelectorAll('.s-title, .cta-title').forEach((title) => {
-      gsap.from(title, {
-        scrollTrigger: {
-          trigger: title,
-          start: 'top 88%',
-          once: true
-        },
-        y: isTouch ? 16 : 35,
-        opacity: 0,
-        duration: isTouch ? 0.55 : 0.9,
-        ease: 'power3.out'
-      });
-    });
-
-    // Section Head Numbers
-    document.querySelectorAll('.s-num, .cta-eyebrow').forEach((num) => {
-      const numSignal = num.querySelector('.signal');
-      const targetNum = numSignal ? parseInt(numSignal.textContent, 10) : NaN;
-
-      gsap.from(num, {
-        scrollTrigger: {
-          trigger: num,
-          start: 'top 90%',
-          once: true,
-          onEnter: () => {
-            if (numSignal && !isNaN(targetNum)) {
-              const counter = { val: 0 };
-              gsap.to(counter, {
-                val: targetNum,
-                duration: 0.4,
-                ease: 'power2.out',
-                onUpdate: () => {
-                  const rounded = Math.round(counter.val);
-                  numSignal.textContent = (rounded < 10 ? '0' : '') + rounded;
-                }
-              });
-            }
-          }
-        },
-        x: isTouch ? 0 : -12,
-        opacity: 0,
-        duration: isTouch ? 0.45 : 0.7,
-        ease: 'power2.out'
-      });
-    });
-
-    // Section Dividers Entrance
-    document.querySelectorAll('.skills-wrap, .cert-list, .edu-list').forEach((div) => {
-      gsap.from(div, {
-        scrollTrigger: {
-          trigger: div,
-          start: 'top 92%',
-          once: true
-        },
-        opacity: 0,
-        y: isTouch ? 8 : 15,
-        duration: isTouch ? 0.5 : 0.8,
-        ease: 'power2.out'
-      });
-    });
+    if (isReducedMotion) return;
 
     // Metrics Rollup Counter Animation
     ScrollTrigger.create({
@@ -290,10 +266,22 @@ export function initPortfolioAnimations() {
             ease: 'power2.out',
             onUpdate: () => {
               el.textContent = Math.round(obj.val);
-            }
+            },
           });
         });
-      }
+      },
+    });
+
+    // Principles grid cards entrance
+    document.querySelectorAll('.principle-card').forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: 'top 88%', once: true },
+        y: isTouch ? 10 : 20,
+        opacity: 0,
+        duration: isTouch ? 0.4 : 0.6,
+        delay: isTouch ? 0 : (index % 3) * 0.08,
+        ease: 'power2.out',
+      });
     });
 
     // About Section
@@ -303,13 +291,13 @@ export function initPortfolioAnimations() {
         scrollTrigger: {
           trigger: '.about-facts',
           start: 'top 85%',
-          once: true
+          once: true,
         },
         x: isTouch ? 0 : 16,
         opacity: 0,
         stagger: isTouch ? 0.025 : 0.06,
         duration: isTouch ? 0.4 : 0.6,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     }
 
@@ -319,13 +307,13 @@ export function initPortfolioAnimations() {
         scrollTrigger: {
           trigger: '.about-text',
           start: 'top 85%',
-          once: true
+          once: true,
         },
         y: isTouch ? 12 : 20,
         opacity: 0,
         stagger: isTouch ? 0.06 : 0.12,
         duration: isTouch ? 0.5 : 0.75,
-        ease: 'power3.out'
+        ease: 'power3.out',
       });
     }
 
@@ -336,13 +324,13 @@ export function initPortfolioAnimations() {
         scrollTrigger: {
           trigger: row,
           start: 'top 90%',
-          once: true
+          once: true,
         },
         y: isTouch ? 5 : 10,
         opacity: 0,
         duration: isTouch ? 0.3 : 0.4,
         stagger: isTouch ? 0.01 : 0.03,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     });
 
@@ -352,13 +340,13 @@ export function initPortfolioAnimations() {
         scrollTrigger: {
           trigger: card,
           start: 'top 88%',
-          once: true
+          once: true,
         },
         y: isTouch ? 12 : 25,
         opacity: 0,
         duration: isTouch ? 0.5 : 0.8,
         delay: isTouch ? 0 : index * 0.1,
-        ease: 'power3.out'
+        ease: 'power3.out',
       });
     });
 
@@ -369,12 +357,12 @@ export function initPortfolioAnimations() {
         scrollTrigger: {
           trigger: projectCardEl,
           start: 'top 85%',
-          once: true
+          once: true,
         },
         y: isTouch ? 12 : 25,
         opacity: 0,
         duration: isTouch ? 0.55 : 0.85,
-        ease: 'power3.out'
+        ease: 'power3.out',
       });
     }
 
@@ -384,47 +372,14 @@ export function initPortfolioAnimations() {
         scrollTrigger: {
           trigger: row,
           start: 'top 88%',
-          once: true
+          once: true,
         },
         y: isTouch ? 8 : 16,
         opacity: 0,
         duration: isTouch ? 0.45 : 0.7,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     });
-
-    // CTA Actions
-    const ctaActions = document.querySelector('.cta-actions');
-    if (ctaActions) {
-      gsap.from(ctaActions, {
-        scrollTrigger: {
-          trigger: '.cta-actions',
-          start: 'top 90%',
-          once: true
-        },
-        y: isTouch ? 10 : 20,
-        opacity: 0,
-        duration: isTouch ? 0.5 : 0.8,
-        ease: 'power3.out'
-      });
-    }
-
-    // Footer Links Stagger
-    const footerAnchors = document.querySelectorAll('.footer-links a');
-    if (footerAnchors.length > 0) {
-      gsap.from(footerAnchors, {
-        scrollTrigger: {
-          trigger: '.footer-links',
-          start: 'top 92%',
-          once: true
-        },
-        y: isTouch ? 5 : 10,
-        opacity: 0,
-        stagger: isTouch ? 0.01 : 0.03,
-        duration: isTouch ? 0.3 : 0.4,
-        ease: 'power2.out'
-      });
-    }
 
     ScrollTrigger.refresh();
   });
