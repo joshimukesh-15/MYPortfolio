@@ -147,15 +147,87 @@ export function initPortfolioAnimations() {
     }
 
     /* -------------------------------------------------------------- */
-    /* Hero wordmark: blade intro + scroll dock                       */
+    /* Hero wordmark: blade intro + per-letter flight dock             */
     /* -------------------------------------------------------------- */
 
     const wordmark = document.querySelector('.hero-wordmark');
     const hero = document.querySelector('.hero');
-    const dockAnchor = document.querySelector('[data-wordmark-anchor]');
     const wmLetters = wordmark
       ? gsap.utils.toArray('.hero-wordmark .wm-letter')
       : [];
+
+    /* ------------------------------------------------------------ */
+    /* Letter flight: every letter of the big wordmark leaves on its */
+    /* own (last letter first) and lands in the fixed corner mark.   */
+    /* Driven by scroll position, like getartcraft.com.              */
+    /* ------------------------------------------------------------ */
+    const startDock = () => {
+      const dockMark = document.querySelector('.dock-mark');
+      const canDock = window.matchMedia('(min-width: 1081px)').matches;
+      if (!wordmark || !dockMark || !canDock) return;
+
+      const heroLetters = gsap.utils.toArray(
+        '.hero-wordmark .wm-letter:not(.wm-letter--space)'
+      );
+      const dockLetters = gsap.utils.toArray('.dock-mark .dm-letter');
+      if (!heroLetters.length || heroLetters.length !== dockLetters.length) return;
+
+      const n = heroLetters.length;
+      const LENGTH = 0.55; /* share of the scroll distance one letter travels */
+      const stagger = n > 1 ? (1 - LENGTH) / (n - 1) : 0;
+      const distance = () => Math.min(window.innerHeight * 0.62, 560);
+      const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      let geo = [];
+
+      const measure = () => {
+        gsap.set(heroLetters, { clearProps: 'transform' });
+        const sy = window.scrollY;
+        const heroSize = parseFloat(getComputedStyle(heroLetters[0]).fontSize) || 1;
+        const dockSize = parseFloat(getComputedStyle(dockLetters[0]).fontSize) || 1;
+        geo = heroLetters.map((el, i) => {
+          const a = el.getBoundingClientRect();
+          const d = dockLetters[i].getBoundingClientRect();
+          return {
+            dx: d.left + d.width / 2 - (a.left + a.width / 2),
+            ny: a.top + a.height / 2 + sy /* natural centre, document space */,
+            ty: d.top + d.height / 2 /* target centre, viewport space */,
+            s: dockSize / heroSize,
+          };
+        });
+      };
+
+      const update = () => {
+        if (!geo.length) return;
+        const sy = window.scrollY;
+        const dist = distance();
+        let done = true;
+        for (let i = 0; i < n; i += 1) {
+          const order = n - 1 - i; /* last letter departs first */
+          const t = Math.min(1, Math.max(0, (sy / dist - order * stagger) / LENGTH));
+          if (t < 1) done = false;
+          const e = ease(t);
+          const g = geo[i];
+          gsap.set(heroLetters[i], {
+            x: e * g.dx,
+            y: e * (g.ty - (g.ny - sy)),
+            scale: 1 + e * (g.s - 1),
+            force3D: true,
+          });
+        }
+        wordmark.classList.toggle('is-docked', done);
+        dockMark.classList.toggle('is-on', done);
+      };
+
+      measure();
+      update();
+      addManagedListener(window, 'scroll', update, { passive: true });
+      const onRefresh = () => {
+        measure();
+        update();
+      };
+      ScrollTrigger.addEventListener('refresh', onRefresh);
+      cleanups.push(() => ScrollTrigger.removeEventListener('refresh', onRefresh));
+    };
 
     if (wordmark && !isReducedMotion) {
       const stageBits = gsap.utils.toArray(
@@ -164,131 +236,139 @@ export function initPortfolioAnimations() {
       const bladeStart = 'inset(-20% 0 -20% 100%)';
       const bladeEnd = 'inset(-20% 0 -20% 0%)';
 
-      if (wmLetters.length && !isTouch) {
-        const runIntro = () => {
-          const total = wordmark.offsetWidth;
-          const firstWidth = wmLetters[0].offsetWidth;
+      if (wmLetters.length) {
+        if (!isTouch) {
+          gsap.set(wmLetters, { opacity: 0 });
 
-          if (!total || !firstWidth) {
-            gsap.set(wmLetters, { opacity: 1 });
-            return;
-          }
+          const runIntro = () => {
+            const total = wordmark.offsetWidth;
+            const firstWidth = wmLetters[0].offsetWidth;
 
-          const startShift = -(total - firstWidth) - wordmark.offsetHeight * 0.12;
+            if (!total || !firstWidth) {
+              gsap.set(wmLetters, { opacity: 1 });
+              startDock();
+              return;
+            }
 
-          const intro = gsap.timeline();
+            const startShift = -(total - firstWidth) - wordmark.offsetHeight * 0.12;
 
-          intro
-            .fromTo(
-              wmLetters[0],
-              { x: total * 0.5 - firstWidth * 0.5, opacity: 0, clipPath: bladeStart },
-              {
-                x: 0,
-                opacity: 1,
-                clipPath: bladeEnd,
-                duration: 0.9,
-                ease: 'power3.inOut',
-              },
-              0
-            )
-            .fromTo(
-              wmLetters.slice(1),
-              { x: startShift, opacity: 0, clipPath: bladeStart },
-              {
-                x: 0,
-                opacity: 1,
-                clipPath: bladeEnd,
-                duration: 0.95,
-                ease: 'power3.inOut',
-                stagger: 0.01,
-                onComplete: () => {
-                  gsap.set(wmLetters, { clearProps: 'transform,opacity,clipPath' });
+            const intro = gsap.timeline({ delay: 0.12 });
+
+            intro
+              .fromTo(
+                wmLetters[0],
+                { x: total * 0.5 - firstWidth * 0.5, opacity: 0, clipPath: bladeStart },
+                { x: 0, opacity: 1, clipPath: bladeEnd, duration: 1.15, ease: 'power3.inOut' },
+                0
+              )
+              .fromTo(
+                wmLetters.slice(1),
+                { x: startShift, opacity: 0, clipPath: bladeStart },
+                {
+                  x: 0,
+                  opacity: 1,
+                  clipPath: bladeEnd,
+                  duration: 1.2,
+                  ease: 'power3.inOut',
+                  stagger: 0.012,
+                  onComplete: () => {
+                    gsap.set(wmLetters, { clearProps: 'transform,opacity,clipPath' });
+                    startDock();
+                  },
                 },
-              },
-              0.02
-            )
-            .fromTo(
-              stageBits,
-              { y: 14, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.65, stagger: 0.05, ease: 'power3.out' },
-              0.4
-            )
-            .fromTo(
-              '.hero-scroll',
-              { opacity: 0 },
-              { opacity: 1, duration: 0.5, ease: 'power2.out' },
-              0.75
-            );
-        };
-
-        // Don't wait on slow networks; start animation promptly to keep LCP fast
-        const fontTimeout = new Promise((resolve) => window.setTimeout(resolve, 60));
-        const fontsReady = document.fonts?.ready
-          ? Promise.race([document.fonts.ready, fontTimeout])
-          : Promise.resolve();
-
-        fontsReady.then(() => window.requestAnimationFrame(runIntro));
-      } else {
-        // Immediate paint on mobile/touch for instantaneous LCP
-        gsap.set(wmLetters, { opacity: 1 });
-      }
-
-      /* Dock the wordmark to the top-right rail while scrolling */
-      const canDock = window.matchMedia('(min-width: 1081px)').matches;
-
-      if (canDock && dockAnchor && hero) {
-        const dockDistance = () => Math.min(window.innerHeight * 0.62, 620);
-
-        const dock = () => {
-          const metrics = () => {
-            const w = wordmark.getBoundingClientRect();
-            const a = dockAnchor.getBoundingClientRect();
-            const scale = Math.min(0.32, Math.max(0.18, a.height / Math.max(1, w.height)));
-            const layoutCenterX = w.left + w.width / 2;
-            const layoutCenterDocY = w.top + w.height / 2 + window.scrollY;
-
-            return {
-              x: a.right - (w.width * scale) / 2 - layoutCenterX,
-              y: a.top + a.height / 2 - layoutCenterDocY + dockDistance(),
-              scale,
-            };
+                0.02
+              )
+              .fromTo(
+                stageBits,
+                { y: 18, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.85, stagger: 0.07, ease: 'power3.out' },
+                0.55
+              )
+              .fromTo(
+                '.hero-scroll',
+                { opacity: 0 },
+                { opacity: 1, duration: 0.6, ease: 'power2.out' },
+                0.95
+              );
           };
 
-          gsap.to(wordmark, {
-            x: () => metrics().x,
-            y: () => metrics().y,
-            scale: () => metrics().scale,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: hero,
-              start: 0,
-              end: () => `+=${dockDistance()}`,
-              scrub: 0.55,
-              invalidateOnRefresh: true,
-              onRefreshInit: () => gsap.set(wordmark, { clearProps: 'transform' }),
-            },
-          });
+          const fontTimeout = new Promise((resolve) => window.setTimeout(resolve, 60));
+          const fontsReady = document.fonts?.ready
+            ? Promise.race([document.fonts.ready, fontTimeout])
+            : Promise.resolve();
 
-          gsap.fromTo(
-            stageBits,
-            { opacity: 1, y: 0 },
-            {
-              opacity: 0,
-              y: -36,
-              ease: 'none',
-              immediateRender: false,
-              scrollTrigger: {
-                trigger: hero,
-                start: 0,
-                end: () => `+=${Math.min(window.innerHeight * 0.45, 460)}`,
-                scrub: 0.4,
-              },
-            }
-          );
-        };
-
-        dock();
+          fontsReady.then(() => window.requestAnimationFrame(runIntro));
+        } else {
+          // Mobile/touch: paint immediately for fast LCP
+          gsap.set(wmLetters, { opacity: 1 });
+          startDock();
+        }
       }
+    }
+
+    /* -------------------------------------------------------------- */
+    /* Section titles: every letter flies in, like the hero wordmark   */
+    /* -------------------------------------------------------------- */
+    if (!isReducedMotion) {
+      const titles = gsap.utils.toArray('.section-title, .contact-title');
+
+      const splitNode = (node) => {
+        Array.from(node.childNodes).forEach((child) => {
+          if (child.nodeType === 3) {
+            const frag = document.createDocumentFragment();
+            child.textContent.split(/(\s+)/).forEach((part) => {
+              if (!part) return;
+              if (/^\s+$/.test(part)) {
+                frag.appendChild(document.createTextNode(' '));
+                return;
+              }
+              const word = document.createElement('span');
+              word.className = 'fly-word';
+              part.split('').forEach((char) => {
+                const letter = document.createElement('span');
+                letter.className = 'fly-letter';
+                letter.setAttribute('aria-hidden', 'true');
+                letter.textContent = char;
+                word.appendChild(letter);
+              });
+              frag.appendChild(word);
+            });
+            node.replaceChild(frag, child);
+          } else if (child.nodeType === 1) {
+            splitNode(child);
+          }
+        });
+      };
+
+      titles.forEach((title) => {
+        if (!title.dataset.split) {
+          title.setAttribute('aria-label', title.textContent.replace(/\s+/g, ' ').trim());
+          splitNode(title);
+          title.dataset.split = 'true';
+        }
+
+        const letters = title.querySelectorAll('.fly-letter');
+        if (!letters.length) return;
+
+        gsap.fromTo(
+          letters,
+          { x: 160, y: -48, rotate: 7, opacity: 0 },
+          {
+            x: 0,
+            y: 0,
+            rotate: 0,
+            opacity: 1,
+            duration: 0.95,
+            ease: 'power3.out',
+            stagger: { each: 0.028, from: 'end' },
+            scrollTrigger: {
+              trigger: title,
+              start: 'top 88%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      });
     }
 
     /* Fonts can shift layout — refresh once ready */

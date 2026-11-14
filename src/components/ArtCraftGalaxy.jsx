@@ -32,11 +32,11 @@ export const GALAXY_TILES = [
     shadowColor: 'rgba(59, 130, 246, 0.45)',
   },
   {
-    id: 'langchain',
-    name: 'LangChain',
-    subtitle: 'RAG Pipeline & Agents',
-    colors: ['#0d9488', '#2dd4bf'],
-    shadowColor: 'rgba(45, 212, 191, 0.45)',
+    id: 'docker',
+    name: 'Docker',
+    subtitle: 'Containerised Deploys',
+    colors: ['#0369a1', '#0ea5e9'],
+    shadowColor: 'rgba(14, 165, 233, 0.45)',
   },
   {
     id: 'chromadb',
@@ -131,19 +131,19 @@ function drawTileIcon(ctx, id) {
       ctx.stroke();
       break;
     }
-    case 'langchain': {
-      // Neural chain nodes
+    case 'docker': {
+      // Container blocks riding on a whale hull
       ctx.lineWidth = 5;
-      ctx.strokeRect(-32, -26, 18, 18);
-      ctx.strokeRect(14, -26, 18, 18);
-      ctx.strokeRect(-9, 10, 18, 18);
+      ctx.strokeRect(-30, -8, 14, 13);
+      ctx.strokeRect(-14, -8, 14, 13);
+      ctx.strokeRect(2, -8, 14, 13);
+      ctx.strokeRect(-14, -23, 14, 13);
+      ctx.strokeRect(2, -23, 14, 13);
       ctx.beginPath();
-      ctx.moveTo(-14, -17);
-      ctx.lineTo(14, -17);
-      ctx.moveTo(-23, -8);
-      ctx.lineTo(-9, 10);
-      ctx.moveTo(23, -8);
-      ctx.lineTo(9, 10);
+      ctx.moveTo(-36, 9);
+      ctx.lineTo(30, 9);
+      ctx.quadraticCurveTo(36, 3, 38, -2);
+      ctx.bezierCurveTo(30, 36, -26, 36, -36, 9);
       ctx.stroke();
       break;
     }

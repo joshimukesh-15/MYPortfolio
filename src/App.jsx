@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { initPortfolioAnimations } from './animations.js';
-import ArtCraftGalaxy from './components/ArtCraftGalaxy.jsx';
+import ArtCraftGalaxy, { GALAXY_TILES } from './components/ArtCraftGalaxy.jsx';
 import SectionHeader from './components/SectionHeader.jsx';
 import './styles.css';
+import './artcraft.css';
 
 const EMAIL = 'joshimukesh2005@gmail.com';
 const GITHUB_URL = 'https://github.com/joshimukesh-15';
@@ -10,6 +11,7 @@ const LINKEDIN_URL = 'https://www.linkedin.com/in/mukesh-joshi-433290379/';
 const RESUME_URL = '/Mukesh_Joshi_Resume_1.pdf';
 
 const NAV_LINKS = [
+  { href: '#toolchain', label: 'Toolchain' },
   { href: '#projects', label: 'Projects' },
   { href: '#skills', label: 'Skills' },
   { href: '#principles', label: 'Principles' },
@@ -215,142 +217,362 @@ function Navigation({ theme, onToggleTheme, menuOpen, onToggleMenu }) {
 /* Scroll ruler                                                        */
 /* ------------------------------------------------------------------ */
 
-const RULER_MARKS = [0, 25, 50, 75, 100];
+const RULER_UNIT = 90.6;
 
 function ScrollRuler() {
+  const trackRef = useRef(null);
   const needleRef = useRef(null);
   const readoutRef = useRef(null);
+  const [units, setUnits] = useState(80);
 
   useEffect(() => {
-    let raf = null;
-    let current = 0;
+    const measure = () => {
+      const next = Math.ceil(document.documentElement.scrollHeight / RULER_UNIT) + 2;
+      setUnits((prev) => (prev === next ? prev : next));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    if (observer) observer.observe(document.body);
 
+    let raf;
     const tick = () => {
+      const y = window.scrollY;
       const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      const target = Math.min(1, Math.max(0, window.scrollY / max));
-      current += (target - current) * 0.16;
-      const isSettled = Math.abs(target - current) < 0.0004;
-      if (isSettled) current = target;
-
-      if (needleRef.current) needleRef.current.style.top = `${(current * 100).toFixed(3)}%`;
-      if (readoutRef.current) readoutRef.current.textContent = `${(current * 100).toFixed(2)}%`;
-
-      if (!isSettled) {
-        raf = window.requestAnimationFrame(tick);
-      } else {
-        raf = null;
+      const progress = Math.min(1, Math.max(0, y / max));
+      const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 48;
+      if (trackRef.current) trackRef.current.style.transform = `translate3d(0, ${-y}px, 0)`;
+      if (needleRef.current) {
+        needleRef.current.style.transform = `translate3d(0, ${progress * (window.innerHeight - navH - 96)}px, 0)`;
       }
-    };
-
-    const onScrollOrResize = () => {
-      if (!raf) {
-        raf = window.requestAnimationFrame(tick);
+      if (readoutRef.current) {
+        readoutRef.current.textContent = `${String(Math.round(progress * 100)).padStart(3, '0')}%`;
       }
+      raf = window.requestAnimationFrame(tick);
     };
-
-    tick();
-
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', onScrollOrResize, { passive: true });
+    raf = window.requestAnimationFrame(tick);
 
     return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScrollOrResize);
-      window.removeEventListener('resize', onScrollOrResize);
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener('resize', measure);
+      if (observer) observer.disconnect();
     };
   }, []);
 
   return (
-    <div className="ruler" aria-hidden="true">
-      <div className="ruler-track">
-        {Array.from({ length: 41 }, (_, i) => (
+    <div className="page-ruler" aria-hidden="true">
+      <div className="pr-track" ref={trackRef} style={{ height: units * RULER_UNIT }}>
+        {Array.from({ length: units }, (_, i) => (
           <span
             key={i}
-            className={`ruler-tick${i % 5 === 0 ? ' is-major' : ''}`}
-            style={{ top: `${(i / 40) * 100}%` }}
-          />
-        ))}
-        {RULER_MARKS.map((mark) => (
-          <span key={mark} className="ruler-mark" style={{ top: `${mark}%` }}>
-            {mark}
+            className={`pr-tick${i % 5 === 0 ? ' is-major' : ''}`}
+            style={{ top: i * RULER_UNIT }}
+          >
+            {i % 5 === 0 ? <b>{i}</b> : null}
           </span>
         ))}
-        <span className="ruler-needle" ref={needleRef} />
       </div>
-      <span className="ruler-readout" ref={readoutRef}>
-        0.00%
-      </span>
+      <div className="pr-needle" ref={needleRef}>
+        <span className="pr-needle-line" />
+        <span className="pr-needle-readout" ref={readoutRef}>000%</span>
+      </div>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Section dock                                                        */
+/* Dock chrome: corner mark, section list and edge label               */
 /* ------------------------------------------------------------------ */
 
-function SectionDock() {
+const DOCK_SECTIONS = [
+  { id: 'toolchain', name: 'Toolchain', short: 'Toolchain' },
+  { id: 'projects', name: 'The lineup', short: 'Lineup' },
+  { id: 'skills', name: 'Skills', short: 'Skills' },
+  { id: 'principles', name: 'Principles', short: 'Principles' },
+  { id: 'about', name: 'About', short: 'About' },
+  { id: 'contact', name: 'Contact', short: 'Contact' },
+];
+
+function PlainLetters({ text, cls }) {
+  return text.split('').map((char, i) =>
+    char === ' ' ? (
+      <span key={`p-${i}`} className="fl-space" aria-hidden="true">&nbsp;</span>
+    ) : (
+      <span key={`${char}-${i}`} className={cls} aria-hidden="true">{char}</span>
+    )
+  );
+}
+
+function FlyLetters({ text, step = 32, offset = 0 }) {
+  return text.split('').map((char, i) =>
+    char === ' ' ? (
+      <span key={`s-${i}`} className="fl-space" aria-hidden="true">&nbsp;</span>
+    ) : (
+      <span
+        key={`${char}-${i}`}
+        className="fl"
+        aria-hidden="true"
+        style={{ '--d': `${offset + i * step}ms` }}
+      >
+        {char}
+      </span>
+    )
+  );
+}
+
+function DockChrome() {
   const [activeId, setActiveId] = useState(null);
-  const dockRef = useRef(null);
+  const prevIdRef = useRef(null);
+  const railMemory = useRef(null);
 
   useEffect(() => {
-    let ticking = false;
-
-    const checkActiveSection = () => {
-      const marker = window.innerHeight * 0.45;
-      let current = null;
-
-      for (const link of NAV_LINKS) {
-        const section = document.querySelector(link.href);
-        if (!section) continue;
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= marker && rect.bottom > marker) {
-          current = link.href.slice(1);
-        }
-      }
-
-      setActiveId((prev) => (prev === current ? prev : current));
-      ticking = false;
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const line = window.innerHeight * 0.4;
+      let found = null;
+      DOCK_SECTIONS.forEach((item) => {
+        const el = document.getElementById(item.id);
+        if (el && el.getBoundingClientRect().top <= line) found = item.id;
+      });
+      setActiveId((prev) => (prev === found ? prev : found));
     };
-
-    const onScrollOrResize = () => {
-      if (!ticking) {
-        ticking = true;
-        window.requestAnimationFrame(checkActiveSection);
-      }
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(compute);
     };
-
-    checkActiveSection();
-
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', onScrollOrResize, { passive: true });
-
+    compute();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     return () => {
-      window.removeEventListener('scroll', onScrollOrResize);
-      window.removeEventListener('resize', onScrollOrResize);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
     };
   }, []);
 
+  const active = DOCK_SECTIONS.find((item) => item.id === activeId) || null;
+
   useLayoutEffect(() => {
-    const el = dockRef.current;
-    if (!el) return;
+    const prevId = prevIdRef.current;
+    prevIdRef.current = activeId;
+    const prevMemory = railMemory.current;
 
-    const rect = el.getBoundingClientRect();
-    const dockFont = parseFloat(window.getComputedStyle(el).fontSize) || 28;
-    const centerFont = Math.min(150, Math.max(56, window.innerWidth * 0.085));
+    const rail = Array.from(document.querySelectorAll('.rail-label .rl'));
+    const corner = Array.from(document.querySelectorAll('.dock-section .cl'));
+    const centre = (el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
 
-    el.style.setProperty('--dock-x', `${window.innerWidth / 2 - (rect.left + rect.width / 2)}px`);
-    el.style.setProperty('--dock-y', `${window.innerHeight * 0.5 - (rect.top + rect.height / 2)}px`);
-    el.style.setProperty('--dock-scale', (centerFont / dockFont).toFixed(3));
-    el.classList.add('is-flying');
+    if (activeId && rail.length) {
+      const cs = getComputedStyle(rail[0]);
+      railMemory.current = {
+        id: activeId,
+        font: {
+          family: cs.fontFamily,
+          weight: cs.fontWeight,
+          stretch: cs.fontStretch,
+          size: parseFloat(cs.fontSize) || 27,
+          spacing: cs.letterSpacing,
+        },
+        letters: rail.map((el) => ({ char: el.textContent, ...centre(el) })),
+      };
+    } else {
+      railMemory.current = null;
+    }
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wide = window.matchMedia('(min-width: 1081px)').matches;
+    if (!wide || reduced) {
+      rail.forEach((el) => { el.style.opacity = '1'; });
+      return undefined;
+    }
+
+    const ghosts = [];
+    const animations = [];
+    const restore = [];
+    const timers = [];
+
+    const makeGhost = (char, font) => {
+      const g = document.createElement('span');
+      g.textContent = char.toUpperCase();
+      g.setAttribute('aria-hidden', 'true');
+      g.style.cssText =
+        'position:fixed;left:0;top:0;margin:0;z-index:95;pointer-events:none;' +
+        'white-space:pre;line-height:1;will-change:transform;opacity:0;' +
+        `color:var(--ink-strong);font-family:${font.family};font-weight:${font.weight};` +
+        `font-stretch:${font.stretch};font-size:${font.size}px;letter-spacing:${font.spacing};`;
+      document.body.appendChild(g);
+      ghosts.push(g);
+      return g;
+    };
+
+    const fly = (ghost, from, to, o) => {
+      const gw = ghost.offsetWidth;
+      const gh = ghost.offsetHeight;
+      const at = (p, rot, sc) =>
+        `translate(${p.x - gw / 2}px, ${p.y - gh / 2}px) rotate(${rot}deg) scale(${sc})`;
+      const mid = { x: (from.x + to.x) / 2 - 90, y: (from.y + to.y) / 2 };
+      const animation = ghost.animate(
+        [
+          { transform: at(from, o.fromRot, o.fromScale), opacity: 0 },
+          { opacity: 1, offset: 0.1 },
+          { transform: at(mid, (o.fromRot + o.toRot) / 2 + o.jitter, 1), offset: 0.5 },
+          { transform: at(to, o.toRot, o.toScale), opacity: 1 },
+        ],
+        {
+          duration: o.duration,
+          delay: o.delay,
+          easing: 'cubic-bezier(0.33, 0, 0.2, 1)',
+          fill: 'both',
+        }
+      );
+      animation.onfinish = () => {
+        ghost.remove();
+        if (o.done) o.done();
+      };
+      animations.push(animation);
+    };
+
+    /* 1 + 2: new section */
+    if (activeId && rail.length) {
+      const font = railMemory.current.font;
+      const listLetters = Array.from(
+        document.querySelectorAll(`.side-nav a[data-sec="${activeId}"] .sl`)
+      );
+
+      if (listLetters.length === rail.length) {
+        const n = rail.length;
+        const listSize = parseFloat(getComputedStyle(listLetters[0]).fontSize) || font.size;
+        rail.forEach((el) => { el.style.opacity = '0'; restore.push(el); });
+
+        rail.forEach((el, i) => {
+          const delay = (n - 1 - i) * 55; /* last letter leads */
+          fly(makeGhost(el.textContent, font), centre(listLetters[i]), centre(el), {
+            delay,
+            duration: 1100,
+            fromRot: 0,
+            toRot: -90,
+            fromScale: listSize / font.size,
+            toScale: 1,
+            jitter: (i % 2 ? 1 : -1) * 32,
+            done: () => { el.style.opacity = '1'; },
+          });
+        });
+
+        /* the end of the name lifts off the rail into the corner */
+        const offset = n - corner.length;
+        corner.forEach((letter, j) => {
+          const idx = Math.min(n - 1, Math.max(0, offset + j));
+          const source = rail[idx];
+          const a = centre(source);
+          const b = letter.getBoundingClientRect();
+          const dx = a.x - (b.left + b.width / 2);
+          const dy = a.y - (b.top + b.height / 2);
+          const delay = (n - 1 - idx) * 55 + 950 + (corner.length - 1 - j) * 70;
+          const spin = j % 2 === 0 ? -1 : 1;
+
+          animations.push(
+            letter.animate(
+              [
+                { transform: `translate(${dx}px, ${dy}px) rotate(${spin * 70}deg) scale(0.55)`, opacity: 0 },
+                { opacity: 1, offset: 0.12 },
+                {
+                  transform: `translate(${dx * 0.45 - 70}px, ${dy * 0.45}px) rotate(${-spin * 28}deg) scale(0.92)`,
+                  offset: 0.55,
+                },
+                { transform: 'translate(0px, 0px) rotate(0deg) scale(1)', opacity: 1 },
+              ],
+              { duration: 1150, delay, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'both' }
+            )
+          );
+          animations.push(
+            source.animate(
+              [{ opacity: 1 }, { opacity: 0, offset: 0.02 }, { opacity: 0, offset: 0.8 }, { opacity: 1 }],
+              { duration: 1900, delay, fill: 'forwards' }
+            )
+          );
+        });
+      } else {
+        rail.forEach((el) => { el.style.opacity = '1'; });
+      }
+    }
+
+    /* 3: previous section's letters fall back into the list */
+    if (prevId && prevMemory && prevMemory.id === prevId) {
+      const targets = Array.from(
+        document.querySelectorAll(`.side-nav a[data-sec="${prevId}"] .sl`)
+      );
+      if (targets.length === prevMemory.letters.length) {
+        const listSize = parseFloat(getComputedStyle(targets[0]).fontSize) || prevMemory.font.size;
+        targets.forEach((el) => { el.style.opacity = '0'; restore.push(el); });
+
+        prevMemory.letters.forEach((L, i) => {
+          fly(makeGhost(L.char, prevMemory.font), { x: L.x, y: L.y }, centre(targets[i]), {
+            delay: i * 45,
+            duration: 1000,
+            fromRot: -90,
+            toRot: 0,
+            fromScale: 1,
+            toScale: listSize / prevMemory.font.size,
+            jitter: (i % 2 ? -1 : 1) * 32,
+            done: () => { targets[i].style.opacity = '1'; },
+          });
+        });
+      }
+    }
+
+    return () => {
+      timers.forEach((t) => window.clearTimeout(t));
+      animations.forEach((animation) => animation.cancel());
+      ghosts.forEach((g) => g.remove());
+      restore.forEach((el) => { el.style.opacity = '1'; });
+    };
   }, [activeId]);
 
-  const activeLink = NAV_LINKS.find((link) => link.href === `#${activeId}`);
-  if (!activeLink) return null;
-
   return (
-    <div key={activeId} ref={dockRef} className="section-dock" aria-hidden="true">
-      {activeLink.label}
-    </div>
+    <>
+      <a href="#top" className="dock-mark" aria-label="Mukesh Joshi, back to top">
+        <span className="dock-mark-word" aria-hidden="true">
+          {WORDMARK.split('').map((char, index) =>
+            char === ' ' ? (
+              <span key={`ds-${index}`} className="dm-space">&nbsp;</span>
+            ) : (
+              <span key={`d-${char}-${index}`} className="dm-letter">{char}</span>
+            )
+          )}
+        </span>
+        <span className={`dock-section${active ? ' is-visible' : ''}`} aria-hidden="true">
+          {active ? (
+            <span key={active.id} className="fl-run">
+              <PlainLetters text={active.short} cls="cl" />
+            </span>
+          ) : null}
+        </span>
+      </a>
+
+      <nav className="side-nav" aria-label="Sections">
+        {DOCK_SECTIONS.map((item) => (
+          <a
+            key={item.id}
+            href={`#${item.id}`}
+            data-sec={item.id}
+            className={item.id === activeId ? 'is-active' : undefined}
+            aria-label={item.name}
+          >
+            <PlainLetters text={item.name} cls="sl" />
+          </a>
+        ))}
+      </nav>
+
+      <span className={`rail-label${active ? ' is-visible' : ''}`} aria-hidden="true">
+        {active ? (
+          <span key={active.id} className="fl-run">
+            <PlainLetters text={active.name} cls="rl" />
+          </span>
+        ) : null}
+      </span>
+    </>
   );
 }
 
@@ -367,10 +589,14 @@ function Hero() {
         <ArtCraftGalaxy />
       </div>
       <div className="hero-scrim" aria-hidden="true" />
-      <span className="hero-dock-anchor" data-wordmark-anchor aria-hidden="true" />
 
       <div className="hero-stage">
         <div className="hero-center">
+          <p className="hero-badge hud-label">
+            <i aria-hidden="true" />
+            Open to 2026 internships
+          </p>
+
           <h1 className="hero-wordmark" aria-label="Mukesh Joshi">
             {WORDMARK.split('').map((char, index) =>
               char === ' ' ? (
@@ -406,7 +632,7 @@ function Hero() {
           </div>
 
           <p className="hero-meta hud-label">
-            Open to 2026 internships · Gujarat, India · IST
+            Gujarat, India · IST / UTC+5:30 · Remote or hybrid
           </p>
 
           <p className="hero-inline">
@@ -533,11 +759,93 @@ function ProjectCard({ project }) {
   );
 }
 
+function ToolchainSection() {
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = () => {
+    const done = () => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(window.location.href).then(done).catch(() => {});
+    }
+  };
+
+  return (
+    <section id="toolchain" className="section">
+      <div className="wrap">
+        <SectionHeader num="01" name="Toolchain" meta="Eight tools · Open source · Production tested" />
+
+        <div className="tool-split">
+          <div className="tool-copy" data-reveal>
+            <h2 className="display section-title">
+              Eight tools. <em>One craft.</em>
+            </h2>
+            <p className="section-lede">
+              Python and FastAPI on the backend, PostgreSQL and ChromaDB underneath, React on
+              the front, Docker packaging every build. The same stack runs both builds
+              below, written from the schema up and open source on GitHub.
+            </p>
+            <div className="section-actions">
+              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="btn btn--solid">
+                <IconGitHub />
+                Browse on GitHub
+              </a>
+              <a href={`mailto:${EMAIL}`} className="btn btn--outline">
+                <IconMail />
+                Get in touch
+              </a>
+            </div>
+          </div>
+
+          <div className="tool-strip" data-reveal>
+            {GALAXY_TILES.map((tile) => (
+              <a
+                key={tile.id}
+                className="tool-chip"
+                href="#projects"
+                style={{
+                  '--tile-a': tile.colors[0],
+                  '--tile-b': tile.colors[1],
+                  '--tile-shadow': tile.shadowColor,
+                }}
+              >
+                <span className="tool-icon" aria-hidden="true">{tile.name.charAt(0)}</span>
+                <span className="tool-name">{tile.name}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div className="share-row hud-label" data-reveal>
+          <span>Share</span>
+          <button type="button" onClick={copyLink}>{copied ? 'Copied' : 'Copy link'}</button>
+          <a
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://mukeshjoshi.vercel.app/')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LinkedIn
+          </a>
+          <a
+            href={`https://x.com/intent/post?url=${encodeURIComponent('https://mukeshjoshi.vercel.app/')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            X
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ProjectsSection() {
   return (
     <section id="projects" className="section">
       <div className="wrap">
-        <SectionHeader num="01" name="Projects" meta="RAG systems & production architecture" />
+        <SectionHeader num="02" name="The lineup" meta="RAG systems & production architecture" />
 
         <div className="section-head" data-reveal>
           <h2 className="display section-title">
@@ -559,6 +867,8 @@ function ProjectsSection() {
             Download résumé
           </a>
         </div>
+
+        <p className="lineup-lead hud-label" data-reveal>Pick a build to explore</p>
 
         <div className="project-lineup">
           {PROJECTS.map((project) => (
@@ -623,7 +933,7 @@ function SkillsSection() {
   return (
     <section id="skills" className="section section--tint">
       <div className="wrap">
-        <SectionHeader num="02" name="Skills" meta="Engineering matrix & core toolkit" />
+        <SectionHeader num="03" name="Skills" meta="Engineering matrix & core toolkit" />
 
         <div className="section-head" data-reveal>
           <h2 className="display section-title">
@@ -689,7 +999,7 @@ function PrinciplesSection() {
   return (
     <section id="principles" className="section">
       <div className="wrap">
-        <SectionHeader num="03" name="Principles" meta="Shared by every build" />
+        <SectionHeader num="04" name="Principles" meta="Shared by every build" />
 
         <div className="section-head" data-reveal>
           <h2 className="display section-title">
@@ -732,7 +1042,7 @@ function AboutSection() {
   return (
     <section id="about" className="section section--tint">
       <div className="wrap">
-        <SectionHeader num="04" name="About" meta="Engineering profile & background" />
+        <SectionHeader num="05" name="About" meta="Engineering profile & background" />
 
         <div className="about-grid">
           <div className="about-copy" data-reveal>
@@ -782,7 +1092,7 @@ function BackgroundSection() {
   return (
     <section id="background" className="section">
       <div className="wrap">
-        <SectionHeader num="05" name="Background" meta="Credentials & academic timeline" />
+        <SectionHeader num="06" name="Background" meta="Credentials & academic timeline" />
 
         <div className="background-grid">
           <div className="background-col" data-reveal>
@@ -845,7 +1155,7 @@ function ContactSection({ onCopyEmail }) {
   return (
     <section id="contact" className="section section--contact">
       <div className="wrap">
-        <SectionHeader num="06" name="Contact" meta="Dispatch & direct inquiry" />
+        <SectionHeader num="07" name="Contact" meta="Dispatch & direct inquiry" />
 
         <div className="contact-panel" data-reveal>
           <div className="contact-main">
@@ -1039,7 +1349,7 @@ export default function App() {
     <>
       <TopProgress />
       <ScrollRuler />
-      <SectionDock />
+      <DockChrome />
       <CopyToast toastMessage={toastMessage} />
       <Navigation
         theme={theme}
@@ -1053,6 +1363,7 @@ export default function App() {
       <main id="main">
         <Hero />
         <MetricsStrip />
+        <ToolchainSection />
         <ProjectsSection />
         <SkillsSection />
         <PrinciplesSection />
